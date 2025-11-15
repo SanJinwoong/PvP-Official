@@ -318,8 +318,8 @@
 	.glass-card {
 		backdrop-filter: blur(40px) saturate(180%);
 		-webkit-backdrop-filter: blur(40px) saturate(180%);
-		background-color: rgba(255, 255, 255, 0.8);
-		border: 1px solid rgba(255, 255, 255, 0.9);
+		background-color: rgba(30, 41, 59, 0.75);
+		border: 1px solid rgba(255, 255, 255, 0.2);
 	}
 
 	.noise-texture {
