@@ -313,3 +313,33 @@
 		</div>
 	</div>
 {/if}
+
+<style>
+	.glass-card {
+		backdrop-filter: blur(40px) saturate(180%);
+		-webkit-backdrop-filter: blur(40px) saturate(180%);
+		background-color: rgba(255, 255, 255, 0.8);
+		border: 1px solid rgba(255, 255, 255, 0.9);
+	}
+
+	.noise-texture {
+		position: absolute;
+		inset: 0;
+		background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+		opacity: 0.015;
+		mix-blend-mode: overlay;
+		pointer-events: none;
+		z-index: 1;
+	}
+
+	.glass-button {
+		backdrop-filter: blur(10px) saturate(180%);
+		-webkit-backdrop-filter: blur(10px) saturate(180%);
+		background-color: rgba(255, 255, 255, 0.15);
+		border-color: rgba(255, 255, 255, 0.3);
+	}
+
+	.glass-button:hover {
+		background-color: rgba(255, 255, 255, 0.25);
+	}
+</style>
