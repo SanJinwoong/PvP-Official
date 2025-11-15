@@ -7,6 +7,7 @@
 		onOrganize?: () => void;
 		onShuffle?: () => void;
 		onStart?: () => void;
+		onReset?: () => void;
 	}
 
 	let {
@@ -16,7 +17,8 @@
 		participantCount,
 		onOrganize,
 		onShuffle,
-		onStart
+		onStart,
+		onReset
 	}: Props = $props();
 
 	let cooldown = $state(false);
@@ -41,9 +43,15 @@
 	</h2>
 
 	{#if tournamentFinished}
-		<div class="text-center py-4">
+		<div class="text-center py-4 space-y-3">
 			<div class="text-3xl mb-2">🎉</div>
 			<p class="font-semibold">¡Torneo Finalizado!</p>
+			<button
+				onclick={onReset}
+				class="w-full bg-white text-purple-600 font-bold py-3 rounded-xl hover:bg-opacity-90 transition-all transform hover:scale-105"
+			>
+				🔄 Nuevo Torneo
+			</button>
 		</div>
 	{:else if !hasPairs}
 		<!-- No hay enfrentamientos organizados -->

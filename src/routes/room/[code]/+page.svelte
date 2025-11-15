@@ -92,6 +92,17 @@
 		wsStore.markWinner(roomCode, pairId, winnerId);
 	}
 
+	function handleReset() {
+		// Limpiar el flag de animación para permitir nueva animación en el próximo torneo
+		const shownKey = `final_winner_shown_${roomCode}`;
+		localStorage.removeItem(shownKey);
+		finalWinnerShown = false;
+		showFinalWinner = false;
+		shownWinners.clear();
+		
+		wsStore.resetTournament(roomCode);
+	}
+
 	function handleLeave() {
 		// Limpiar el flag de animación mostrada al salir
 		const shownKey = `final_winner_shown_${roomCode}`;
@@ -166,6 +177,7 @@
 							onOrganize={handleOrganize}
 							onShuffle={handleShuffle}
 							onStart={handleStart}
+							onReset={handleReset}
 						/>
 					</div>
 				{/if}

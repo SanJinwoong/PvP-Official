@@ -317,6 +317,20 @@ function createSupabaseStore() {
 		}
 	}
 
+	async function resetTournament(code: string) {
+		await supabase
+			.from('rooms')
+			.update({
+				pairs: [],
+				bracket: { rounds: [] },
+				tournament_started: false,
+				tournament_finished: false,
+				current_pair_index: 0,
+				current_round: 0
+			})
+			.eq('code', code);
+	}
+
 	function generateRoomCode(): string {
 		const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 		let code = '';
@@ -343,7 +357,8 @@ function createSupabaseStore() {
 		organizePairs,
 		shufflePairs,
 		startTournament,
-		markWinner
+		markWinner,
+		resetTournament
 	};
 }
 
