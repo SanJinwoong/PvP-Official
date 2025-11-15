@@ -1,4 +1,4 @@
-import { writable, derived } from 'svelte/store';
+import { writable, derived, get } from 'svelte/store';
 import type { Writable } from 'svelte/store';
 import { supabase } from '$lib/supabase';
 
@@ -295,14 +295,18 @@ function createSupabaseStore() {
 			})
 			.eq('code', roomCode);
 
-		store.update(s => ({
-			...s,
-			lastWinner: { participantId: winnerId, pairId }
-		}));
+		// Mostrar animación solo si no la hemos mostrado para este par
+		const currentState = get(store);
+		if (currentState.lastWinner?.pairId !== pairId) {
+			store.update(s => ({
+				...s,
+				lastWinner: { participantId: winnerId, pairId }
+			}));
 
-		setTimeout(() => {
-			store.update(s => ({ ...s, lastWinner: null }));
-		}, 3000);
+			setTimeout(() => {
+				store.update(s => ({ ...s, lastWinner: null }));
+			}, 3000);
+		}
 	}
 
 	function generateRoomCode(): string {
