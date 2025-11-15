@@ -78,118 +78,89 @@
 	<title>PvP Arena - Sala de Batallas</title>
 </svelte:head>
 
-<div class="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-indigo-100 flex items-center justify-center p-4 relative overflow-hidden">
-	<!-- Elementos decorativos de fondo -->
-	<div class="absolute inset-0 overflow-hidden pointer-events-none">
-		<!-- Círculos decorativos azules -->
-		<div class="absolute top-10 left-10 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-		<div class="absolute top-20 right-20 w-96 h-96 bg-indigo-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-		<div class="absolute -bottom-10 left-1/3 w-80 h-80 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+<div class="min-h-screen relative overflow-hidden flex items-center justify-center">
+	<!-- Imagen de fondo con overlay -->
+	<div class="absolute inset-0">
+		<!-- Imagen de fondo -->
+		<img 
+			src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070&auto=format&fit=crop" 
+			alt="Gaming background" 
+			class="w-full h-full object-cover"
+		/>
+		<!-- Overlay gradiente oscuro -->
+		<div class="absolute inset-0 bg-gradient-to-br from-blue-900/95 via-indigo-900/90 to-blue-800/95"></div>
+		
+		<!-- Efectos de luz -->
+		<div class="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full filter blur-3xl animate-pulse"></div>
+		<div class="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-500/20 rounded-full filter blur-3xl animate-pulse" style="animation-delay: 1s"></div>
 	</div>
 
-	<!-- Contenedor principal con grid -->
-	<div class="max-w-7xl w-full grid grid-cols-1 lg:grid-cols-3 gap-8 items-center relative z-10">
-		<!-- Columna izquierda: Imágenes decorativas -->
-		<div class="hidden lg:flex flex-col gap-6">
-			<div class="relative group">
-				<div class="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl transform rotate-3 group-hover:rotate-6 transition-transform duration-300"></div>
-				<div class="relative bg-white rounded-3xl p-2 shadow-2xl">
-					<img src="https://i.pravatar.cc/400?img=33" alt="Competitor 1" class="w-full h-48 object-cover rounded-2xl" />
+	<!-- Contenido principal -->
+	<div class="relative z-10 w-full max-w-md mx-auto p-6">
+		<!-- Logo y título -->
+		<div class="text-center mb-8">
+			<div class="inline-block mb-6">
+				<div class="w-20 h-20 mx-auto rounded-full bg-white flex items-center justify-center shadow-2xl">
+					<svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+					</svg>
 				</div>
 			</div>
-			<div class="relative group ml-8">
-				<div class="absolute inset-0 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-3xl transform -rotate-3 group-hover:-rotate-6 transition-transform duration-300"></div>
-				<div class="relative bg-white rounded-3xl p-2 shadow-2xl">
-					<img src="https://i.pravatar.cc/400?img=68" alt="Competitor 2" class="w-full h-48 object-cover rounded-2xl" />
-				</div>
-			</div>
+			<h1 class="text-5xl font-black text-white mb-3 tracking-tight">PvP Arena</h1>
+			<p class="text-blue-200 text-lg font-medium">Never Lost. Discover New Battles.</p>
 		</div>
 
-		<!-- Columna central: Formulario principal -->
-		<div class="w-full max-w-md mx-auto">
-			<!-- Tarjeta principal -->
-			<div class="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 space-y-6">
-				<!-- Título -->
-				<div class="text-center">
-					<div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
-						<svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-						</svg>
-					</div>
-					<h1 class="text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 mb-2">PvP Arena</h1>
-					<p class="text-gray-600 font-medium">Crea tu perfil y comienza a competir</p>
-				</div>
-
-				<!-- Avatar -->
-				<div class="flex justify-center">
-					<AvatarUpload {avatar} onchange={handleAvatarChange} />
-				</div>
-
-				<!-- Nombre -->
-				<div>
-					<label for="name" class="block text-sm font-bold text-gray-700 mb-2">
-						Tu nombre
-					</label>
-					<input
-						id="name"
-						type="text"
-						bind:value={name}
-						oninput={handleNameChange}
-						placeholder="Ingresa tu nombre"
-						class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all text-center text-lg font-semibold"
-						maxlength="20"
-					/>
-				</div>
-
-				<!-- Botones principales -->
-				<div class="space-y-3 pt-4">
-					<button
-						onclick={openCreateModal}
-						class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center justify-center gap-2"
-					>
-						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-						</svg>
-						Crear Sala
-					</button>
-
-					<button
-						onclick={openJoinModal}
-						class="w-full bg-white text-blue-600 font-bold py-4 rounded-xl border-2 border-blue-200 hover:bg-blue-50 hover:border-blue-400 transition-all flex items-center justify-center gap-2"
-					>
-						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-						</svg>
-						Unirse a Sala
-					</button>
-				</div>
-
-				<!-- Nota -->
-				<div class="text-center text-xs text-gray-500 pt-4 border-t border-gray-200">
-					<div class="flex items-center justify-center gap-2">
-						<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-							<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-						</svg>
-						<span>Los datos son volátiles</span>
-					</div>
-				</div>
+		<!-- Card de login -->
+		<div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl space-y-6">
+			<!-- Avatar -->
+			<div class="flex justify-center mb-2">
+				<AvatarUpload {avatar} onchange={handleAvatarChange} />
 			</div>
+
+			<!-- Input de nombre -->
+			<div>
+				<input
+					id="name"
+					type="text"
+					bind:value={name}
+					oninput={handleNameChange}
+					placeholder="Tu nombre"
+					class="w-full px-6 py-4 bg-white/90 backdrop-blur-sm rounded-2xl border-0 focus:outline-none focus:ring-4 focus:ring-blue-400/50 transition-all text-center text-lg font-semibold text-gray-900 placeholder-gray-400 shadow-lg"
+					maxlength="20"
+				/>
+			</div>
+
+			<!-- Botones -->
+			<div class="space-y-3 pt-2">
+				<button
+					onclick={openCreateModal}
+					class="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-4 px-6 rounded-full shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-200 text-lg"
+				>
+					CREAR SALA
+				</button>
+
+				<button
+					onclick={openJoinModal}
+					class="w-full bg-white/10 backdrop-blur-sm text-white font-bold py-4 px-6 rounded-full border-2 border-white/30 hover:bg-white/20 hover:border-white/50 transition-all duration-200 text-lg"
+				>
+					UNIRSE A SALA
+				</button>
+			</div>
+
+			<!-- Texto inferior -->
+			<p class="text-center text-white/60 text-sm pt-4 border-t border-white/10">
+				Salas temporales • Batallas épicas
+			</p>
 		</div>
 
-		<!-- Columna derecha: Más imágenes decorativas -->
-		<div class="hidden lg:flex flex-col gap-6">
-			<div class="relative group mr-8">
-				<div class="absolute inset-0 bg-gradient-to-br from-blue-600 to-indigo-500 rounded-3xl transform rotate-3 group-hover:rotate-6 transition-transform duration-300"></div>
-				<div class="relative bg-white rounded-3xl p-2 shadow-2xl">
-					<img src="https://i.pravatar.cc/400?img=12" alt="Competitor 3" class="w-full h-48 object-cover rounded-2xl" />
-				</div>
-			</div>
-			<div class="relative group">
-				<div class="absolute inset-0 bg-gradient-to-br from-indigo-600 to-blue-500 rounded-3xl transform -rotate-3 group-hover:-rotate-6 transition-transform duration-300"></div>
-				<div class="relative bg-white rounded-3xl p-2 shadow-2xl">
-					<img src="https://i.pravatar.cc/400?img=56" alt="Competitor 4" class="w-full h-48 object-cover rounded-2xl" />
-				</div>
-			</div>
+		<!-- Info adicional -->
+		<div class="text-center mt-6">
+			<p class="text-blue-200/70 text-xs flex items-center justify-center gap-2">
+				<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+					<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+				</svg>
+				Los datos son volátiles y se reinician con el servidor
+			</p>
 		</div>
 	</div>
 </div>
@@ -199,29 +170,29 @@
 	<div
 		role="button"
 		tabindex="0"
-		class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+		class="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50"
 		onclick={() => (showCreateModal = false)}
 		onkeydown={(e) => e.key === 'Escape' && (showCreateModal = false)}
 	>
 		<div
 			role="dialog"
 			tabindex="-1"
-			class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl transform transition-all"
+			class="bg-gradient-to-br from-blue-900/95 to-indigo-900/95 backdrop-blur-xl border border-white/20 rounded-3xl p-8 max-w-sm w-full shadow-2xl transform transition-all"
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => e.stopPropagation()}
 		>
 			<div class="text-center mb-6">
-				<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
-					<svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-white flex items-center justify-center shadow-lg">
+					<svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
 					</svg>
 				</div>
-				<h2 class="text-2xl font-black text-gray-900">Crear Sala</h2>
-				<p class="text-sm text-gray-500 mt-1">Configura tu torneo</p>
+				<h2 class="text-2xl font-black text-white mb-2">CREAR SALA</h2>
+				<p class="text-sm text-blue-200">Configura tu torneo épico</p>
 			</div>
 
 			<div class="mb-6">
-				<label for="maxParticipants" class="block text-sm font-bold text-gray-700 mb-2">
+				<label for="maxParticipants" class="block text-sm font-bold text-white/80 mb-3 text-center">
 					Máximo de participantes
 				</label>
 				<input
@@ -230,21 +201,21 @@
 					bind:value={maxParticipants}
 					min="2"
 					max="20"
-					class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all text-center text-lg font-semibold"
+					class="w-full px-6 py-4 bg-white/90 backdrop-blur-sm rounded-2xl border-0 focus:outline-none focus:ring-4 focus:ring-blue-400/50 transition-all text-center text-2xl font-black text-gray-900 shadow-lg"
 				/>
-				<p class="text-xs text-gray-500 mt-2 text-center">Entre 2 y 20 jugadores</p>
+				<p class="text-xs text-blue-200/70 mt-3 text-center">Entre 2 y 20 jugadores</p>
 			</div>
 
 			<div class="flex gap-3">
 				<button
 					onclick={() => (showCreateModal = false)}
-					class="flex-1 px-4 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all"
+					class="flex-1 px-4 py-3 bg-white/10 backdrop-blur-sm text-white font-bold rounded-full border-2 border-white/30 hover:bg-white/20 transition-all"
 				>
 					Cancelar
 				</button>
 				<button
 					onclick={handleCreateRoom}
-					class="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all"
+					class="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold rounded-full shadow-xl hover:shadow-2xl hover:scale-105 transition-all"
 				>
 					Crear
 				</button>
@@ -258,37 +229,34 @@
 	<div
 		role="button"
 		tabindex="0"
-		class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+		class="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50"
 		onclick={() => (showJoinModal = false)}
 		onkeydown={(e) => e.key === 'Escape' && (showJoinModal = false)}
 	>
 		<div
 			role="dialog"
 			tabindex="-1"
-			class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl transform transition-all"
+			class="bg-gradient-to-br from-blue-900/95 to-indigo-900/95 backdrop-blur-xl border border-white/20 rounded-3xl p-8 max-w-sm w-full shadow-2xl transform transition-all"
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => e.stopPropagation()}
 		>
 			<div class="text-center mb-6">
-				<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
-					<svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-white flex items-center justify-center shadow-lg">
+					<svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
 					</svg>
 				</div>
-				<h2 class="text-2xl font-black text-gray-900">Unirse a Sala</h2>
-				<p class="text-sm text-gray-500 mt-1">Ingresa el código de 6 dígitos</p>
+				<h2 class="text-2xl font-black text-white mb-2">UNIRSE</h2>
+				<p class="text-sm text-blue-200">Ingresa el código de 6 dígitos</p>
 			</div>
 
 			<div class="mb-6">
-				<label for="roomCode" class="block text-sm font-bold text-gray-700 mb-2">
-					Código de sala
-				</label>
 				<input
 					id="roomCode"
 					type="text"
 					bind:value={roomCode}
 					placeholder="ABC123"
-					class="w-full px-4 py-4 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all uppercase text-center text-3xl font-black tracking-widest"
+					class="w-full px-6 py-5 bg-white/90 backdrop-blur-sm rounded-2xl border-0 focus:outline-none focus:ring-4 focus:ring-blue-400/50 transition-all uppercase text-center text-4xl font-black tracking-widest text-gray-900 placeholder-gray-400 shadow-lg"
 					maxlength="6"
 				/>
 			</div>
@@ -296,13 +264,13 @@
 			<div class="flex gap-3">
 				<button
 					onclick={() => (showJoinModal = false)}
-					class="flex-1 px-4 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all"
+					class="flex-1 px-4 py-3 bg-white/10 backdrop-blur-sm text-white font-bold rounded-full border-2 border-white/30 hover:bg-white/20 transition-all"
 				>
 					Cancelar
 				</button>
 				<button
 					onclick={handleJoinRoom}
-					class="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all"
+					class="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold rounded-full shadow-xl hover:shadow-2xl hover:scale-105 transition-all"
 				>
 					Unirse
 				</button>
@@ -312,33 +280,12 @@
 {/if}
 
 {#if $wsStore.error}
-	<div class="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
-		❌ {$wsStore.error}
+	<div class="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-full shadow-2xl z-50 backdrop-blur-xl border border-red-400">
+		<div class="flex items-center gap-2">
+			<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+				<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+			</svg>
+			<span class="font-semibold">{$wsStore.error}</span>
+		</div>
 	</div>
 {/if}
-
-<style>
-	@keyframes blob {
-		0%, 100% {
-			transform: translate(0px, 0px) scale(1);
-		}
-		33% {
-			transform: translate(30px, -50px) scale(1.1);
-		}
-		66% {
-			transform: translate(-20px, 20px) scale(0.9);
-		}
-	}
-	
-	.animate-blob {
-		animation: blob 7s infinite;
-	}
-	
-	.animation-delay-2000 {
-		animation-delay: 2s;
-	}
-	
-	.animation-delay-4000 {
-		animation-delay: 4s;
-	}
-</style>
