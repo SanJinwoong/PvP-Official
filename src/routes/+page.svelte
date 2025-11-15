@@ -75,7 +75,7 @@
 </script>
 
 <svelte:head>
-	<title>PvP Arena - Sala de Batallas</title>
+	<title>BB • Pelea - Sala de Batallas</title>
 </svelte:head>
 
 <div class="min-h-screen relative overflow-hidden flex items-center justify-center">
@@ -106,8 +106,11 @@
 					</svg>
 				</div>
 			</div>
-			<h1 class="text-4xl font-black text-white mb-2 tracking-tight" style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;">PvP Arena</h1>
-			<p class="text-blue-200 text-base font-medium" style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;">Never Lost. Discover New Battles.</p>
+			</svg>
+		</div>
+	</div>
+	<h1 class="text-4xl font-black text-white mb-2 tracking-tight" style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;">BB • Pelea</h1>
+	<p class="text-blue-200 text-base font-medium" style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;">Never Lost. Discover New Battles.</p>
 		</div>
 
 		<!-- Card de login con efecto Glass iOS + Noise -->
