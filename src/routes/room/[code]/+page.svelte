@@ -14,6 +14,7 @@
 
 	let showFinalWinner = $state(false);
 	let pairWinner = $state<any>(null);
+	let shownWinners = new Set<string>(); // Track winners we've already shown
 
 	onMount(() => {
 		const unsubscribe = wsStore.subscribe(($ws) => {
@@ -31,16 +32,22 @@
 				}, 1000);
 			}
 
-			// Mostrar animación de par ganador
+			// Mostrar animación de par ganador SOLO si no la hemos mostrado antes
 			if ($ws.lastWinner && $ws.room) {
-				const participant = $ws.room.participants.find(
-					(p) => p.id === $ws.lastWinner?.participantId
-				);
-				if (participant) {
-					pairWinner = participant;
-					setTimeout(() => {
-						pairWinner = null;
-					}, 2500);
+				const winnerKey = `${$ws.lastWinner.pairId}-${$ws.lastWinner.participantId}`;
+				
+				if (!shownWinners.has(winnerKey)) {
+					shownWinners.add(winnerKey);
+					
+					const participant = $ws.room.participants.find(
+						(p) => p.id === $ws.lastWinner?.participantId
+					);
+					if (participant) {
+						pairWinner = participant;
+						setTimeout(() => {
+							pairWinner = null;
+						}, 2500);
+					}
 				}
 			}
 		});
