@@ -194,7 +194,11 @@
 
 				{#if $wsStore.room.tournamentFinished}
 					<div class="mt-4">
-						<Podium participants={$wsStore.room.participants} pairs={$wsStore.room.pairs} />
+						<Podium 
+							participants={$wsStore.room.participants} 
+							pairs={$wsStore.room.pairs}
+							bracket={$wsStore.room.bracket}
+						/>
 					</div>
 				{/if}
 			</div>

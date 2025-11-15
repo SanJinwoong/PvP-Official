@@ -1,21 +1,34 @@
 <script lang="ts">
 	import type { Participant } from '$lib/stores/websocket';
+	import type { Bracket } from '$lib/bracket-generator';
 
 	interface Props {
 		participants: Participant[];
-		pairs: any[];
+		pairs?: any[];
+		bracket?: Bracket | null;
 	}
 
-	let { participants, pairs }: Props = $props();
+	let { participants, pairs = [], bracket = null }: Props = $props();
 
 	// Calcular podio basado en victorias
 	const podium = $derived.by(() => {
 		const winCounts = new Map<string, number>();
 
-		// Contar victorias
-		for (const pair of pairs) {
-			if (pair.winner) {
-				winCounts.set(pair.winner, (winCounts.get(pair.winner) || 0) + 1);
+		// Si tenemos bracket profesional, contar victorias desde ahí
+		if (bracket && bracket.rounds && bracket.rounds.length > 0) {
+			for (const round of bracket.rounds) {
+				for (const match of round.matches) {
+					if (match.winner) {
+						winCounts.set(match.winner, (winCounts.get(match.winner) || 0) + 1);
+					}
+				}
+			}
+		} else {
+			// Fallback al sistema antiguo de pairs
+			for (const pair of pairs) {
+				if (pair.winner) {
+					winCounts.set(pair.winner, (winCounts.get(pair.winner) || 0) + 1);
+				}
 			}
 		}
 
