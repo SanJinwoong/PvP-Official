@@ -184,7 +184,7 @@ function createSupabaseStore() {
 		store.update(s => ({ ...s, room: null, connected: false }));
 	}
 
-	async function organizePairs(roomCode: string) {
+	async function organizePairs(roomCode: string, mode: 'lv1' | '4-players' = '1v1') {
 		const { data: room } = await supabase
 			.from('rooms')
 			.select('*')
@@ -193,8 +193,8 @@ function createSupabaseStore() {
 
 		if (!room) return;
 
-		// Generar bracket profesional
-		const bracket = generateBracket(room.participants);
+		// Generar bracket profesional con el modo seleccionado
+		const bracket = generateBracket(room.participants, mode);
 
 		await supabase
 			.from('rooms')
@@ -211,8 +211,9 @@ function createSupabaseStore() {
 
 		if (!room || room.tournament_started) return;
 
-		// Regenerar bracket con nuevo orden
-		const bracket = generateBracket(room.participants);
+		// Regenerar bracket con nuevo orden (mantener el mismo modo)
+		const currentMode = room.bracket?.mode || '1v1';
+		const bracket = generateBracket(room.participants, currentMode);
 
 		await supabase
 			.from('rooms')
@@ -227,21 +228,38 @@ function createSupabaseStore() {
 			.eq('code', roomCode)
 			.single();
 
-		if (!room || room.pairs.length === 0) return;
+		if (!room) return;
 
-		const pairs = room.pairs.map((p: any, i: number) => ({
-			...p,
-			isActive: i === 0
-		}));
+		// Verificar si hay bracket (nuevo sistema) o pairs (legacy)
+		const hasBracket = room.bracket && room.bracket.rounds && room.bracket.rounds.length > 0;
+		const hasPairs = room.pairs && room.pairs.length > 0;
 
-		await supabase
-			.from('rooms')
-			.update({ 
-				tournament_started: true,
-				pairs,
-				current_pair_index: 0
-			})
-			.eq('code', roomCode);
+		if (!hasBracket && !hasPairs) return;
+
+		if (hasPairs && !hasBracket) {
+			// Sistema legacy
+			const pairs = room.pairs.map((p: any, i: number) => ({
+				...p,
+				isActive: i === 0
+			}));
+
+			await supabase
+				.from('rooms')
+				.update({ 
+					tournament_started: true,
+					pairs,
+					current_pair_index: 0
+				})
+				.eq('code', roomCode);
+		} else {
+			// Sistema bracket moderno
+			await supabase
+				.from('rooms')
+				.update({ 
+					tournament_started: true
+				})
+				.eq('code', roomCode);
+		}
 	}
 
 	async function markWinner(roomCode: string, pairId: string, winnerId: string) {

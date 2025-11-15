@@ -106,11 +106,8 @@
 					</svg>
 				</div>
 			</div>
-			</svg>
-		</div>
-	</div>
-	<h1 class="text-4xl font-black text-white mb-2 tracking-tight" style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;">BB • Pelea</h1>
-	<p class="text-blue-200 text-base font-medium" style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;">Never Lost. Discover New Battles.</p>
+			<h1 class="text-4xl font-black text-white mb-2 tracking-tight" style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;">BB • Pelea</h1>
+			<p class="text-blue-200 text-base font-medium" style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;">Never Lost. Discover New Battles.</p>
 		</div>
 
 		<!-- Card de login con efecto Glass iOS + Noise -->

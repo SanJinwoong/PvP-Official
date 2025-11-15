@@ -77,8 +77,8 @@
 		alert('Código copiado: ' + roomCode);
 	}
 
-	function handleOrganize() {
-		wsStore.organizePairs(roomCode);
+	function handleOrganize(mode: 'lv1' | '4-players' = '1v1') {
+		wsStore.organizePairs(roomCode, mode);
 	}
 
 	function handleShuffle() {
@@ -186,9 +186,11 @@
 					<div class="mt-4">
 						<AdminControls
 							hasPairs={$wsStore.room.pairs.length > 0}
+							hasBracket={$wsStore.room.bracket !== null && $wsStore.room.bracket.rounds && $wsStore.room.bracket.rounds.length > 0}
 							tournamentStarted={$wsStore.room.tournamentStarted}
 							tournamentFinished={$wsStore.room.tournamentFinished}
 							participantCount={$wsStore.room.participants.length}
+							tournamentMode={$wsStore.room.bracket?.mode || '1v1'}
 							onOrganize={handleOrganize}
 							onShuffle={handleShuffle}
 							onStart={handleStart}
@@ -207,6 +209,7 @@
 					participants={$wsStore.room.participants}
 					isAdmin={$isAdmin}
 					tournamentStarted={$wsStore.room.tournamentStarted}
+					tournamentMode={$wsStore.room.bracket.mode || '1v1'}
 					onMarkWinner={handleMarkWinner}
 				/>
 			{:else}
