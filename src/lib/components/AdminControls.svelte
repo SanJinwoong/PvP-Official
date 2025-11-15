@@ -155,15 +155,20 @@
 
 						<!-- Opción extra para modo 1v1: doble pelea para el BYE -->
 						{#if selectedMode === '1v1'}
-							<div class="bg-amber-50 border border-amber-200 rounded-xl p-3">
-								<label class="flex items-start gap-3 cursor-pointer">
-									<input 
-										type="checkbox" 
-										bind:checked={doubleMatchForBye}
-										class="mt-1 w-4 h-4 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500"
-									/>
+							<div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+								<label class="flex items-start gap-3 cursor-pointer group">
+									<div class="relative flex items-center">
+										<input 
+											type="checkbox" 
+											bind:checked={doubleMatchForBye}
+											class="peer w-5 h-5 cursor-pointer border-2 border-gray-400 rounded checked:bg-blue-600 checked:border-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 appearance-none"
+										/>
+										<svg class="absolute w-3 h-3 left-1 pointer-events-none hidden peer-checked:block text-white" fill="currentColor" viewBox="0 0 12 12">
+											<path d="M3.707 5.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4a1 1 0 00-1.414-1.414L5 6.586 3.707 5.293z"/>
+										</svg>
+									</div>
 									<div class="flex-1">
-										<p class="font-bold text-sm text-gray-900">Doble pelea para BYE</p>
+										<p class="font-bold text-sm text-gray-900 group-hover:text-blue-700 transition-colors">Doble pelea para BYE</p>
 										<p class="text-xs text-gray-700 mt-0.5">
 											Si un jugador queda sin pareja, jugará 2 veces contra jugadores aleatorios de la lista
 										</p>
