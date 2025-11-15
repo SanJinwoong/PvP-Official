@@ -122,37 +122,55 @@
 </svelte:head>
 
 {#if !$wsStore.room}
-	<div class="min-h-screen bg-linear-to-br from-purple-600 to-pink-500 flex items-center justify-center">
-		<div class="text-white text-center">
-			<div class="text-6xl mb-4 animate-spin">⏳</div>
-			<p class="text-xl">Conectando a la sala...</p>
+	<div class="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+		<div class="text-center">
+			<div class="w-20 h-20 mx-auto mb-6 rounded-full bg-white shadow-xl flex items-center justify-center">
+				<div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+			</div>
+			<p class="text-xl font-semibold text-gray-900">Conectando a la sala...</p>
+			<p class="text-sm text-gray-500 mt-2">Un momento por favor</p>
 		</div>
 	</div>
 {:else}
-	<div class="min-h-screen bg-linear-to-br from-purple-600 via-pink-500 to-red-500 p-4">
-		<!-- Header -->
-		<div class="max-w-7xl mx-auto mb-4">
-			<div class="bg-white rounded-2xl p-4 shadow-lg flex items-center justify-between">
-				<div>
-					<h1 class="text-2xl font-bold text-gray-800">Sala: {roomCode}</h1>
-					<p class="text-sm text-gray-600">
-						{$wsStore.room.participants.length} / {$wsStore.room.maxParticipants} participantes
-					</p>
-				</div>
+	<div class="min-h-screen bg-gray-50 p-4 md:p-6">
+		<!-- Header Premium -->
+		<div class="max-w-7xl mx-auto mb-6">
+			<div class="bg-white rounded-3xl p-6 shadow-xl border border-gray-100">
+				<div class="flex items-center justify-between">
+					<div class="flex items-center gap-4">
+						<div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
+							<svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+							</svg>
+						</div>
+						<div>
+							<h1 class="text-2xl font-black text-gray-900">Sala {roomCode}</h1>
+							<p class="text-sm text-gray-500 font-medium mt-0.5">
+								{$wsStore.room.participants.length} / {$wsStore.room.maxParticipants} participantes activos
+							</p>
+						</div>
+					</div>
 
-				<div class="flex gap-2">
-					<button
-						onclick={copyRoomCode}
-						class="px-4 py-2 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-colors"
-					>
-						📋 Copiar código
-					</button>
-					<button
-						onclick={handleLeave}
-						class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-					>
-						🚪 Salir
-					</button>
+					<div class="flex gap-3">
+						<button
+							onclick={copyRoomCode}
+							class="px-5 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all hover:scale-105 flex items-center gap-2"
+						>
+							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+							</svg>
+							<span class="hidden sm:inline">Copiar código</span>
+						</button>
+						<button
+							onclick={handleLeave}
+							class="px-5 py-2.5 bg-red-500 text-white font-semibold rounded-xl hover:bg-red-600 transition-all hover:scale-105 flex items-center gap-2"
+						>
+							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+							</svg>
+							<span class="hidden sm:inline">Salir</span>
+						</button>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -204,19 +222,34 @@
 					onMarkWinner={handleMarkWinner}
 				/>
 			{/if}				{#if !$wsStore.room.tournamentStarted && $wsStore.room.pairs.length === 0 && !$isAdmin}
-					<div class="bg-white rounded-2xl p-8 shadow-lg text-center mt-4">
-						<div class="text-6xl mb-4">⏳</div>
-						<p class="text-xl text-gray-600">
-							Esperando a que el admin organice los enfrentamientos...
+					<div class="bg-white rounded-3xl p-12 shadow-xl text-center border border-gray-100">
+						<div class="w-20 h-20 mx-auto mb-6 rounded-full bg-blue-50 flex items-center justify-center">
+							<svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+							</svg>
+						</div>
+						<p class="text-xl font-bold text-gray-900 mb-2">
+							Esperando al administrador
+						</p>
+						<p class="text-gray-500">
+							El admin organizará los enfrentamientos pronto
 						</p>
 					</div>
 				{/if}
 
 				{#if !$wsStore.room.tournamentStarted && $wsStore.room.pairs.length > 0 && !$isAdmin}
-					<div class="bg-white rounded-2xl p-8 shadow-lg text-center mt-4">
-						<div class="text-6xl mb-4">🎮</div>
-						<p class="text-xl text-gray-600">
-							Esperando a que el admin inicie el torneo...
+					<div class="bg-white rounded-3xl p-12 shadow-xl text-center border border-gray-100">
+						<div class="w-20 h-20 mx-auto mb-6 rounded-full bg-green-50 flex items-center justify-center">
+							<svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+							</svg>
+						</div>
+						<p class="text-xl font-bold text-gray-900 mb-2">
+							¡Todo listo para comenzar!
+						</p>
+						<p class="text-gray-500">
+							Esperando a que el admin inicie el torneo
 						</p>
 					</div>
 				{/if}
