@@ -1,8 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
-import { env } from '$env/dynamic/public';
+import { browser } from '$app/environment';
 
-const supabaseUrl = env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = env.VITE_SUPABASE_ANON_KEY || '';
+// Use process.env in server, globalThis in browser
+const getEnvVar = (key: string): string => {
+	if (browser) {
+		return (globalThis as any)[key] || '';
+	}
+	return process.env[key] || '';
+};
+
+const supabaseUrl = getEnvVar('VITE_SUPABASE_URL');
+const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY');
 
 if (!supabaseUrl || !supabaseAnonKey) {
 	console.warn('⚠️ Supabase credentials not found. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env');
