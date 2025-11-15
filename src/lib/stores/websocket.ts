@@ -366,6 +366,16 @@ export const activePair = derived(wsStore, $ws => {
 
 export const winner = derived(wsStore, $ws => {
 	if (!$ws.room || !$ws.room.tournamentFinished) return null;
+	
+	// Intentar obtener ganador del bracket profesional primero
+	if ($ws.room.bracket && $ws.room.bracket.rounds.length > 0) {
+		const winnerId = getTournamentWinner($ws.room.bracket);
+		if (winnerId) {
+			return $ws.room.participants.find(p => p.id === winnerId) || null;
+		}
+	}
+	
+	// Fallback al sistema antiguo de pairs
 	const lastPair = $ws.room.pairs[$ws.room.pairs.length - 1];
 	if (!lastPair?.winner) return null;
 	return $ws.room.participants.find(p => p.id === lastPair.winner) || null;

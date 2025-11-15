@@ -16,8 +16,13 @@
 	let showFinalWinner = $state(false);
 	let pairWinner = $state<any>(null);
 	let shownWinners = new Set<string>(); // Track winners we've already shown
+	let finalWinnerShown = $state(false); // Track if final winner animation was shown
 
 	onMount(() => {
+		// Verificar si ya se mostró el ganador final para esta sala
+		const shownKey = `final_winner_shown_${roomCode}`;
+		finalWinnerShown = localStorage.getItem(shownKey) === 'true';
+
 		const unsubscribe = wsStore.subscribe(($ws) => {
 			// Redirigir si no hay sala después de cargar
 			if ($ws.connected && !$ws.room) {
@@ -26,8 +31,12 @@
 				}, 2000);
 			}
 
-			// Mostrar ganador final
-			if ($ws.room?.tournamentFinished && $winner) {
+			// Mostrar ganador final SOLO UNA VEZ por sala
+			if ($ws.room?.tournamentFinished && $winner && !finalWinnerShown) {
+				const shownKey = `final_winner_shown_${roomCode}`;
+				localStorage.setItem(shownKey, 'true');
+				finalWinnerShown = true;
+				
 				setTimeout(() => {
 					showFinalWinner = true;
 				}, 1000);
@@ -84,8 +93,16 @@
 	}
 
 	function handleLeave() {
+		// Limpiar el flag de animación mostrada al salir
+		const shownKey = `final_winner_shown_${roomCode}`;
+		localStorage.removeItem(shownKey);
+		
 		wsStore.leaveRoom();
 		goto('/');
+	}
+	
+	function handleCloseWinnerAnimation() {
+		showFinalWinner = false;
 	}
 </script>
 
@@ -213,7 +230,7 @@
 
 <!-- Animación de ganador final -->
 {#if showFinalWinner && $winner}
-	<WinAnimation winner={$winner} onClose={() => (showFinalWinner = false)} />
+	<WinAnimation winner={$winner} onClose={handleCloseWinnerAnimation} />
 {/if}
 
 <!-- Notificación de error -->
