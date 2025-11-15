@@ -184,7 +184,11 @@ function createSupabaseStore() {
 		store.update(s => ({ ...s, room: null, connected: false }));
 	}
 
-	async function organizePairs(roomCode: string, mode: 'lv1' | '4-players' = '1v1') {
+	async function organizePairs(
+		roomCode: string, 
+		mode: '1v1' | '4-players' = '1v1',
+		doubleMatchForBye: boolean = false
+	) {
 		const { data: room } = await supabase
 			.from('rooms')
 			.select('*')
@@ -194,7 +198,7 @@ function createSupabaseStore() {
 		if (!room) return;
 
 		// Generar bracket profesional con el modo seleccionado
-		const bracket = generateBracket(room.participants, mode);
+		const bracket = generateBracket(room.participants, mode, doubleMatchForBye);
 
 		await supabase
 			.from('rooms')
@@ -211,9 +215,10 @@ function createSupabaseStore() {
 
 		if (!room || room.tournament_started) return;
 
-		// Regenerar bracket con nuevo orden (mantener el mismo modo)
+		// Regenerar bracket con nuevo orden (mantener el mismo modo y opciones)
 		const currentMode = room.bracket?.mode || '1v1';
-		const bracket = generateBracket(room.participants, currentMode);
+		const doubleMatchForBye = room.bracket?.doubleMatchForBye || false;
+		const bracket = generateBracket(room.participants, currentMode, doubleMatchForBye);
 
 		await supabase
 			.from('rooms')

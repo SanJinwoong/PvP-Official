@@ -9,7 +9,7 @@
 		tournamentFinished: boolean;
 		participantCount: number;
 		tournamentMode?: TournamentMode;
-		onOrganize?: (mode: TournamentMode) => void;
+		onOrganize?: (mode: TournamentMode, doubleMatchForBye?: boolean) => void;
 		onShuffle?: () => void;
 		onStart?: () => void;
 		onReset?: () => void;
@@ -31,6 +31,7 @@
 	let cooldown = $state(false);
 	let selectedMode = $state<TournamentMode>(tournamentMode);
 	let showModeSelector = $state(false);
+	let doubleMatchForBye = $state(false); // Nueva opción para doble pelea del BYE
 
 	function handleShuffle() {
 		if (cooldown) return;
@@ -45,7 +46,7 @@
 	}
 
 	function handleOrganize() {
-		onOrganize?.(selectedMode);
+		onOrganize?.(selectedMode, doubleMatchForBye);
 		showModeSelector = false;
 	}
 </script>
@@ -123,7 +124,7 @@
 						<p class="text-sm font-bold text-gray-900 mb-2">Selecciona el modo de torneo:</p>
 						
 						<button
-							onclick={() => { selectedMode = '1v1'; handleOrganize(); }}
+							onclick={() => { selectedMode = '1v1'; }}
 							class="w-full bg-white border-2 {selectedMode === '1v1' ? 'border-blue-500' : 'border-gray-200'} rounded-xl p-3 hover:border-blue-400 transition-all text-left"
 						>
 							<div class="flex items-start gap-3">
@@ -138,7 +139,7 @@
 						</button>
 
 						<button
-							onclick={() => { selectedMode = '4-players'; handleOrganize(); }}
+							onclick={() => { selectedMode = '4-players'; }}
 							class="w-full bg-white border-2 {selectedMode === '4-players' ? 'border-blue-500' : 'border-gray-200'} rounded-xl p-3 hover:border-blue-400 transition-all text-left"
 						>
 							<div class="flex items-start gap-3">
@@ -150,6 +151,32 @@
 									<p class="text-xs text-gray-600">4 jugadores por partido, solo 1 avanza a la siguiente ronda</p>
 								</div>
 							</div>
+						</button>
+
+						<!-- Opción extra para modo 1v1: doble pelea para el BYE -->
+						{#if selectedMode === '1v1'}
+							<div class="bg-amber-50 border border-amber-200 rounded-xl p-3">
+								<label class="flex items-start gap-3 cursor-pointer">
+									<input 
+										type="checkbox" 
+										bind:checked={doubleMatchForBye}
+										class="mt-1 w-4 h-4 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500"
+									/>
+									<div class="flex-1">
+										<p class="font-bold text-sm text-gray-900">Doble pelea para BYE</p>
+										<p class="text-xs text-gray-700 mt-0.5">
+											Si un jugador queda sin pareja, jugará 2 veces contra jugadores aleatorios de la lista
+										</p>
+									</div>
+								</label>
+							</div>
+						{/if}
+
+						<button
+							onclick={handleOrganize}
+							class="w-full bg-linear-to-r from-blue-500 to-blue-600 text-white font-bold py-3 px-6 rounded-xl hover:shadow-lg hover:scale-105 transition-all"
+						>
+							Generar Torneo
 						</button>
 
 						<button

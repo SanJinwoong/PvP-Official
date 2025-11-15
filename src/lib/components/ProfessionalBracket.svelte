@@ -24,7 +24,7 @@
 			? [match.participant1, match.participant2, match.participant3, match.participant4]
 			: [match.participant1, match.participant2];
 		
-		return ids.map(id => getParticipant(id)).filter(p => p !== null) as Participant[];
+		return ids.map(id => id ? getParticipant(id) : null).filter(p => p !== null) as Participant[];
 	}
 </script>
 

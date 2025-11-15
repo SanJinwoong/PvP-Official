@@ -37,6 +37,7 @@ export interface Bracket {
 	currentRound: number;
 	currentMatch: number;
 	mode: TournamentMode;
+	doubleMatchForBye?: boolean; // Nueva opción: si el BYE juega 2 veces
 }
 
 /**
@@ -58,9 +59,13 @@ function getRoundName(roundNumber: number, totalRounds: number): string {
  * Modo 1v1: cada match es 1 vs 1, si hay número impar, uno recibe BYE (pasa automáticamente)
  * Modo 4-players: cada match es 4 jugadores, solo 1 pasa a la siguiente ronda
  */
-export function generateBracket(participants: Participant[], mode: TournamentMode = '1v1'): Bracket {
+export function generateBracket(
+	participants: Participant[], 
+	mode: TournamentMode = '1v1',
+	doubleMatchForBye: boolean = false
+): Bracket {
 	if (mode === '1v1') {
-		return generate1v1Bracket(participants);
+		return generate1v1Bracket(participants, doubleMatchForBye);
 	} else {
 		return generate4PlayersBracket(participants);
 	}
@@ -69,8 +74,9 @@ export function generateBracket(participants: Participant[], mode: TournamentMod
 /**
  * Genera bracket 1v1 tradicional
  * Si hay número impar de participantes, uno recibe BYE automático
+ * Si doubleMatchForBye = true, el que queda sin pareja juega 2 veces contra random
  */
-function generate1v1Bracket(participants: Participant[]): Bracket {
+function generate1v1Bracket(participants: Participant[], doubleMatchForBye: boolean = false): Bracket {
 	const participantCount = participants.length;
 	
 	if (participantCount < 2) {
@@ -84,10 +90,19 @@ function generate1v1Bracket(participants: Participant[]): Bracket {
 	const firstRoundMatches: Match[] = [];
 	let matchCounter = 1;
 	let i = 0;
+	let byePlayer: Participant | null = null;
 
 	while (i < shuffled.length) {
 		const p1 = shuffled[i];
 		const p2 = shuffled[i + 1] || null; // Si es impar, p2 es null (BYE)
+
+		// Si doubleMatchForBye está activo y es impar
+		if (!p2 && doubleMatchForBye && shuffled.length > 1) {
+			// El jugador sin pareja jugará 2 veces
+			byePlayer = p1;
+			i += 1;
+			continue; // No crear match todavía
+		}
 
 		const match: Match = {
 			id: crypto.randomUUID(),
@@ -98,13 +113,35 @@ function generate1v1Bracket(participants: Participant[]): Bracket {
 			matchNumber: matchCounter++
 		};
 
-		// Si hay BYE (solo 1 participante), pasa automáticamente
-		if (!p2) {
+		// Si hay BYE (solo 1 participante) y NO está activa la opción de doble pelea
+		if (!p2 && !doubleMatchForBye) {
 			match.winner = p1.id;
 		}
 
 		firstRoundMatches.push(match);
 		i += 2; // Avanzar de 2 en 2
+	}
+
+	// Si hay byePlayer (modo doble pelea), crear 2 matches para él
+	if (byePlayer && firstRoundMatches.length >= 1) {
+		// Seleccionar 2 oponentes al azar de los que ya están en peleas
+		const availableOpponents = shuffled.filter(p => p.id !== byePlayer.id);
+		
+		// Mezclar y tomar 2
+		const randomOpponents = availableOpponents.sort(() => Math.random() - 0.5).slice(0, 2);
+		
+		// Crear 2 matches para el byePlayer
+		for (const opponent of randomOpponents) {
+			const match: Match = {
+				id: crypto.randomUUID(),
+				participant1: byePlayer.id,
+				participant2: opponent.id,
+				winner: null,
+				isActive: false,
+				matchNumber: matchCounter++
+			};
+			firstRoundMatches.push(match);
+		}
 	}
 
 	// Activar el primer match que no tenga ganador automático
@@ -152,7 +189,8 @@ function generate1v1Bracket(participants: Participant[]): Bracket {
 		totalParticipants: participantCount,
 		currentRound: 0,
 		currentMatch: 0,
-		mode: '1v1'
+		mode: '1v1',
+		doubleMatchForBye: doubleMatchForBye
 	};
 }
 
@@ -299,7 +337,7 @@ export function advanceBracket(bracket: Bracket, matchId: string, winnerId: stri
 		// Si no es la última ronda, poblar la siguiente ronda con los ganadores
 		if (currentRoundIndex < newBracket.rounds.length - 1) {
 			const nextRound = newBracket.rounds[currentRoundIndex + 1];
-			const winners = currentRound.matches.map((m: Match) => m.winner).filter(w => w !== null);
+			const winners = currentRound.matches.map((m: Match) => m.winner).filter((w: string | null) => w !== null);
 
 			if (newBracket.mode === '1v1') {
 				// Modo 1v1: emparejar ganadores de 2 en 2

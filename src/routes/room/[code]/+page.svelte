@@ -17,13 +17,9 @@
 	let showFinalWinner = $state(false);
 	let pairWinner = $state<any>(null);
 	let shownWinners = new Set<string>(); // Track winners we've already shown
-	let finalWinnerShown = $state(false); // Track if final winner animation was shown
+	let lastTournamentWinner = $state<string | null>(null); // Track last tournament's winner ID
 
 	onMount(() => {
-		// Verificar si ya se mostró el ganador final para esta sala
-		const shownKey = `final_winner_shown_${roomCode}`;
-		finalWinnerShown = localStorage.getItem(shownKey) === 'true';
-
 		const unsubscribe = wsStore.subscribe(($ws) => {
 			// Redirigir si no hay sala después de cargar
 			if ($ws.connected && !$ws.room) {
@@ -32,15 +28,19 @@
 				}, 2000);
 			}
 
-			// Mostrar ganador final SOLO UNA VEZ por sala
-			if ($ws.room?.tournamentFinished && $winner && !finalWinnerShown) {
-				const shownKey = `final_winner_shown_${roomCode}`;
-				localStorage.setItem(shownKey, 'true');
-				finalWinnerShown = true;
+			// Mostrar ganador final cada vez que haya un nuevo ganador
+			if ($ws.room?.tournamentFinished && $winner && $winner.id !== lastTournamentWinner) {
+				lastTournamentWinner = $winner.id;
 				
 				setTimeout(() => {
 					showFinalWinner = true;
 				}, 1000);
+			}
+			
+			// Resetear animación cuando el torneo se resetee
+			if (!$ws.room?.tournamentFinished && lastTournamentWinner !== null) {
+				lastTournamentWinner = null;
+				showFinalWinner = false;
 			}
 
 			// Mostrar animación de par ganador SOLO si no la hemos mostrado antes
@@ -77,8 +77,8 @@
 		alert('Código copiado: ' + roomCode);
 	}
 
-	function handleOrganize(mode: 'lv1' | '4-players' = '1v1') {
-		wsStore.organizePairs(roomCode, mode);
+	function handleOrganize(mode: '1v1' | '4-players' = '1v1', doubleMatchForBye: boolean = false) {
+		wsStore.organizePairs(roomCode, mode, doubleMatchForBye);
 	}
 
 	function handleShuffle() {
@@ -94,21 +94,15 @@
 	}
 
 	function handleReset() {
-		// Limpiar el flag de animación para permitir nueva animación en el próximo torneo
-		const shownKey = `final_winner_shown_${roomCode}`;
-		localStorage.removeItem(shownKey);
-		finalWinnerShown = false;
+		// Resetear estado de animación
 		showFinalWinner = false;
+		lastTournamentWinner = null;
 		shownWinners.clear();
 		
 		wsStore.resetTournament(roomCode);
 	}
 
 	function handleLeave() {
-		// Limpiar el flag de animación mostrada al salir
-		const shownKey = `final_winner_shown_${roomCode}`;
-		localStorage.removeItem(shownKey);
-		
 		wsStore.leaveRoom();
 		goto('/');
 	}
