@@ -2,6 +2,14 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Accept build arguments from Dokploy
+ARG VITE_SUPABASE_URL
+ARG VITE_SUPABASE_ANON_KEY
+
+# Make them available as environment variables during build
+ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
+ENV VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
+
 COPY package*.json ./
 RUN npm ci
 
