@@ -96,70 +96,77 @@
 	</div>
 
 	<!-- Contenido principal -->
-	<div class="relative z-10 w-full max-w-md mx-auto p-6">
+	<div class="relative z-10 w-full max-w-sm mx-auto p-4">
 		<!-- Logo y título -->
-		<div class="text-center mb-8">
-			<div class="inline-block mb-6">
-				<div class="w-20 h-20 mx-auto rounded-full bg-white flex items-center justify-center shadow-2xl">
-					<svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+		<div class="text-center mb-6">
+			<div class="inline-block mb-4">
+				<div class="w-16 h-16 mx-auto rounded-full bg-white flex items-center justify-center shadow-2xl">
+					<svg class="w-9 h-9 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
 					</svg>
 				</div>
 			</div>
-			<h1 class="text-5xl font-black text-white mb-3 tracking-tight">PvP Arena</h1>
-			<p class="text-blue-200 text-lg font-medium">Never Lost. Discover New Battles.</p>
+			<h1 class="text-4xl font-black text-white mb-2 tracking-tight" style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;">PvP Arena</h1>
+			<p class="text-blue-200 text-base font-medium" style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;">Never Lost. Discover New Battles.</p>
 		</div>
 
-		<!-- Card de login -->
-		<div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl space-y-6">
-			<!-- Avatar -->
-			<div class="flex justify-center mb-2">
-				<AvatarUpload {avatar} onchange={handleAvatarChange} />
+		<!-- Card de login con efecto Glass iOS -->
+		<div class="relative overflow-hidden rounded-3xl shadow-2xl" style="backdrop-filter: blur(40px) saturate(180%); -webkit-backdrop-filter: blur(40px) saturate(180%); background-color: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.18);">
+			<div class="p-6 space-y-4">
+				<!-- Avatar -->
+				<div class="flex justify-center mb-1">
+					<AvatarUpload {avatar} onchange={handleAvatarChange} />
+				</div>
+
+				<!-- Input de nombre -->
+				<div>
+					<input
+						id="name"
+						type="text"
+						bind:value={name}
+						oninput={handleNameChange}
+						placeholder="Tu nombre"
+						class="w-full px-5 py-3 bg-white/95 backdrop-blur-sm rounded-2xl border-0 focus:outline-none focus:ring-3 focus:ring-blue-400/50 transition-all text-center text-base font-semibold text-gray-900 placeholder-gray-400 shadow-lg"
+						style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;"
+						maxlength="20"
+					/>
+				</div>
+
+				<!-- Botones -->
+				<div class="space-y-2.5 pt-1">
+					<button
+						onclick={openCreateModal}
+						class="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-3.5 px-6 rounded-full shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all duration-200 text-base"
+						style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif; letter-spacing: 0.3px;"
+					>
+						CREAR SALA
+					</button>
+
+					<button
+						onclick={openJoinModal}
+						class="w-full text-white font-bold py-3.5 px-6 rounded-full border-2 transition-all duration-200 text-base"
+						style="backdrop-filter: blur(10px) saturate(180%); -webkit-backdrop-filter: blur(10px) saturate(180%); background-color: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.25); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif; letter-spacing: 0.3px;"
+						onmouseenter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'}
+						onmouseleave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
+					>
+						UNIRSE A SALA
+					</button>
+				</div>
+
+				<!-- Texto inferior -->
+				<p class="text-center text-white/50 text-xs pt-3 border-t border-white/10" style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;">
+					Salas temporales • Batallas épicas
+				</p>
 			</div>
-
-			<!-- Input de nombre -->
-			<div>
-				<input
-					id="name"
-					type="text"
-					bind:value={name}
-					oninput={handleNameChange}
-					placeholder="Tu nombre"
-					class="w-full px-6 py-4 bg-white/90 backdrop-blur-sm rounded-2xl border-0 focus:outline-none focus:ring-4 focus:ring-blue-400/50 transition-all text-center text-lg font-semibold text-gray-900 placeholder-gray-400 shadow-lg"
-					maxlength="20"
-				/>
-			</div>
-
-			<!-- Botones -->
-			<div class="space-y-3 pt-2">
-				<button
-					onclick={openCreateModal}
-					class="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-4 px-6 rounded-full shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-200 text-lg"
-				>
-					CREAR SALA
-				</button>
-
-				<button
-					onclick={openJoinModal}
-					class="w-full bg-white/10 backdrop-blur-sm text-white font-bold py-4 px-6 rounded-full border-2 border-white/30 hover:bg-white/20 hover:border-white/50 transition-all duration-200 text-lg"
-				>
-					UNIRSE A SALA
-				</button>
-			</div>
-
-			<!-- Texto inferior -->
-			<p class="text-center text-white/60 text-sm pt-4 border-t border-white/10">
-				Salas temporales • Batallas épicas
-			</p>
 		</div>
 
 		<!-- Info adicional -->
-		<div class="text-center mt-6">
-			<p class="text-blue-200/70 text-xs flex items-center justify-center gap-2">
-				<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+		<div class="text-center mt-4">
+			<p class="text-blue-200/60 text-xs flex items-center justify-center gap-2" style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;">
+				<svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
 					<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
 				</svg>
-				Los datos son volátiles y se reinician con el servidor
+				<span>Los datos son volátiles</span>
 			</p>
 		</div>
 	</div>
@@ -177,22 +184,23 @@
 		<div
 			role="dialog"
 			tabindex="-1"
-			class="bg-gradient-to-br from-blue-900/95 to-indigo-900/95 backdrop-blur-xl border border-white/20 rounded-3xl p-8 max-w-sm w-full shadow-2xl transform transition-all"
+			class="rounded-3xl p-7 max-w-sm w-full shadow-2xl transform transition-all"
+			style="backdrop-filter: blur(40px) saturate(180%); -webkit-backdrop-filter: blur(40px) saturate(180%); background-color: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.18);"
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => e.stopPropagation()}
 		>
 			<div class="text-center mb-6">
-				<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-white flex items-center justify-center shadow-lg">
-					<svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+				<div class="w-14 h-14 mx-auto mb-4 rounded-full bg-white flex items-center justify-center shadow-lg">
+					<svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
 					</svg>
 				</div>
-				<h2 class="text-2xl font-black text-white mb-2">CREAR SALA</h2>
-				<p class="text-sm text-blue-200">Configura tu torneo épico</p>
+				<h2 class="text-2xl font-black text-white mb-1.5" style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;">CREAR SALA</h2>
+				<p class="text-sm text-blue-200" style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;">Configura tu torneo épico</p>
 			</div>
 
-			<div class="mb-6">
-				<label for="maxParticipants" class="block text-sm font-bold text-white/80 mb-3 text-center">
+			<div class="mb-5">
+				<label for="maxParticipants" class="block text-sm font-semibold text-white/70 mb-2.5 text-center" style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;">
 					Máximo de participantes
 				</label>
 				<input
@@ -201,21 +209,26 @@
 					bind:value={maxParticipants}
 					min="2"
 					max="20"
-					class="w-full px-6 py-4 bg-white/90 backdrop-blur-sm rounded-2xl border-0 focus:outline-none focus:ring-4 focus:ring-blue-400/50 transition-all text-center text-2xl font-black text-gray-900 shadow-lg"
+					class="w-full px-5 py-3.5 bg-white/95 backdrop-blur-sm rounded-2xl border-0 focus:outline-none focus:ring-3 focus:ring-blue-400/50 transition-all text-center text-2xl font-black text-gray-900 shadow-lg"
+					style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;"
 				/>
-				<p class="text-xs text-blue-200/70 mt-3 text-center">Entre 2 y 20 jugadores</p>
+				<p class="text-xs text-blue-200/60 mt-2.5 text-center" style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;">Entre 2 y 20 jugadores</p>
 			</div>
 
 			<div class="flex gap-3">
 				<button
 					onclick={() => (showCreateModal = false)}
-					class="flex-1 px-4 py-3 bg-white/10 backdrop-blur-sm text-white font-bold rounded-full border-2 border-white/30 hover:bg-white/20 transition-all"
+					class="flex-1 px-4 py-3 text-white font-bold rounded-full border-2 transition-all"
+					style="backdrop-filter: blur(10px) saturate(180%); -webkit-backdrop-filter: blur(10px) saturate(180%); background-color: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.25); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;"
+					onmouseenter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'}
+					onmouseleave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
 				>
 					Cancelar
 				</button>
 				<button
 					onclick={handleCreateRoom}
-					class="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold rounded-full shadow-xl hover:shadow-2xl hover:scale-105 transition-all"
+					class="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold rounded-full shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all"
+					style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;"
 				>
 					Crear
 				</button>
@@ -236,27 +249,29 @@
 		<div
 			role="dialog"
 			tabindex="-1"
-			class="bg-gradient-to-br from-blue-900/95 to-indigo-900/95 backdrop-blur-xl border border-white/20 rounded-3xl p-8 max-w-sm w-full shadow-2xl transform transition-all"
+			class="rounded-3xl p-7 max-w-sm w-full shadow-2xl transform transition-all"
+			style="backdrop-filter: blur(40px) saturate(180%); -webkit-backdrop-filter: blur(40px) saturate(180%); background-color: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.18);"
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => e.stopPropagation()}
 		>
 			<div class="text-center mb-6">
-				<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-white flex items-center justify-center shadow-lg">
-					<svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+				<div class="w-14 h-14 mx-auto mb-4 rounded-full bg-white flex items-center justify-center shadow-lg">
+					<svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
 					</svg>
 				</div>
-				<h2 class="text-2xl font-black text-white mb-2">UNIRSE</h2>
-				<p class="text-sm text-blue-200">Ingresa el código de 6 dígitos</p>
+				<h2 class="text-2xl font-black text-white mb-1.5" style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;">UNIRSE</h2>
+				<p class="text-sm text-blue-200" style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;">Ingresa el código de 6 dígitos</p>
 			</div>
 
-			<div class="mb-6">
+			<div class="mb-5">
 				<input
 					id="roomCode"
 					type="text"
 					bind:value={roomCode}
 					placeholder="ABC123"
-					class="w-full px-6 py-5 bg-white/90 backdrop-blur-sm rounded-2xl border-0 focus:outline-none focus:ring-4 focus:ring-blue-400/50 transition-all uppercase text-center text-4xl font-black tracking-widest text-gray-900 placeholder-gray-400 shadow-lg"
+					class="w-full px-5 py-4 bg-white/95 backdrop-blur-sm rounded-2xl border-0 focus:outline-none focus:ring-3 focus:ring-blue-400/50 transition-all uppercase text-center text-3xl font-black tracking-widest text-gray-900 placeholder-gray-400 shadow-lg"
+					style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;"
 					maxlength="6"
 				/>
 			</div>
@@ -264,13 +279,17 @@
 			<div class="flex gap-3">
 				<button
 					onclick={() => (showJoinModal = false)}
-					class="flex-1 px-4 py-3 bg-white/10 backdrop-blur-sm text-white font-bold rounded-full border-2 border-white/30 hover:bg-white/20 transition-all"
+					class="flex-1 px-4 py-3 text-white font-bold rounded-full border-2 transition-all"
+					style="backdrop-filter: blur(10px) saturate(180%); -webkit-backdrop-filter: blur(10px) saturate(180%); background-color: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.25); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;"
+					onmouseenter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'}
+					onmouseleave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
 				>
 					Cancelar
 				</button>
 				<button
 					onclick={handleJoinRoom}
-					class="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold rounded-full shadow-xl hover:shadow-2xl hover:scale-105 transition-all"
+					class="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold rounded-full shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all"
+					style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;"
 				>
 					Unirse
 				</button>
