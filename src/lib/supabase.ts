@@ -1,20 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
-import { browser } from '$app/environment';
 
-// Use process.env in server, globalThis in browser
-const getEnvVar = (key: string): string => {
-	if (browser) {
-		return (globalThis as any)[key] || '';
-	}
-	return process.env[key] || '';
-};
-
-const supabaseUrl = getEnvVar('VITE_SUPABASE_URL');
-const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY');
-
-if (!supabaseUrl || !supabaseAnonKey) {
-	console.warn('⚠️ Supabase credentials not found. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env');
-}
+// Supabase public credentials (safe to expose)
+const supabaseUrl = 'https://tqkqshhhyjihfmmcefii.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxa3FzaGhoeWppaGZtbWNlZmlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE2MjA3ODYsImV4cCI6MjA0NzE5Njc4Nn0.m0BKAZ5Dz8pD-HUZuOWZlIgFoGfQkO8yb_N9N2Qe12Q';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 	realtime: {
