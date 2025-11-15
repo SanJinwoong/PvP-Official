@@ -168,38 +168,6 @@
 		{/each}
 	</div>
 </div>
-												<button
-													onclick={() => onMarkWinner?.(match.id, p1.id)}
-													class="win-btn"
-												>
-													✓
-												</button>
-											{/if}
-										{:else}
-											<div class="bye-slot">
-												<span class="bye-text">TBD</span>
-											</div>
-										{/if}
-									</div>
-
-									<div class="vs-divider">VS</div>
-
-									<!-- Participante 2 -->
-									<div class="participant {match.winner === p2?.id ? 'winner' : ''}">
-										{#if p2}
-											<img src={p2.avatar} alt={p2.name} class="participant-avatar" />
-											<span class="participant-name">{p2.name}</span>
-											{#if match.winner === p2.id}
-												<span class="winner-icon">🏆</span>
-											{/if}
-											{#if isActive && isAdmin && !hasWinner}
-												<button
-													onclick={() => onMarkWinner?.(match.id, p2.id)}
-													class="win-btn"
-												>
-		{/each}
-	</div>
-</div>
 
 <style>
 	.custom-scrollbar::-webkit-scrollbar {
