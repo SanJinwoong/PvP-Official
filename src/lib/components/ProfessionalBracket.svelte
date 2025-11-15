@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Round, Match } from '$lib/bracket-generator';
 	import type { Participant } from '$lib/stores/websocket';
+	import Trophy from './icons/Trophy.svelte';
 
 	interface Props {
 		rounds: Round[];
@@ -16,68 +17,157 @@
 		if (!id) return null;
 		return participants.find((p) => p.id === id) || null;
 	}
-
-	function getMatchWidth(totalRounds: number): string {
-		// Calcular ancho base según número de rondas
-		const baseWidth = 280;
-		return `${baseWidth}px`;
-	}
-
-	function getMatchHeight(roundNumber: number): string {
-		// Aumentar altura según la ronda (más espaciado en rondas avanzadas)
-		const baseHeight = 120;
-		const multiplier = Math.pow(2, roundNumber - 1);
-		return `${baseHeight * multiplier}px`;
-	}
 </script>
 
-<div class="bracket-container">
-	<div class="bracket-scroll">
-		<div class="bracket-wrapper">
-			{#each rounds as round, roundIndex (round.roundNumber)}
-				<div class="bracket-round" style="min-width: {getMatchWidth(rounds.length)}">
-					<!-- Título de la ronda -->
-					<div class="round-header">
-						<h3 class="round-title">{round.roundName}</h3>
+<div class="w-full overflow-x-auto custom-scrollbar">
+	<div class="inline-flex gap-8 p-6 min-w-full">
+		{#each rounds as round, roundIndex (round.roundNumber)}
+			<div class="flex flex-col min-w-[320px]">
+				<!-- Título de la ronda -->
+				<div class="mb-6 text-center">
+					<h3 class="text-xl font-black text-gray-900 mb-2">{round.roundName}</h3>
+					<div class="flex items-center justify-center gap-2">
 						{#if round.isComplete}
-							<span class="round-badge complete">✓ Completa</span>
+							<span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full flex items-center gap-1.5">
+								<svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+									<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+								</svg>
+								Completa
+							</span>
 						{:else}
-							<span class="round-badge active">● En curso</span>
+							<span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full flex items-center gap-1.5">
+								<span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+								En curso
+							</span>
 						{/if}
 					</div>
+				</div>
 
-					<!-- Matches de la ronda -->
-					<div class="matches-container">
-						{#each round.matches as match, matchIndex (match.id)}
-							{@const p1 = getParticipant(match.participant1)}
-							{@const p2 = getParticipant(match.participant2)}
-							{@const hasWinner = !!match.winner}
-							{@const isActive = match.isActive}
+				<!-- Matches de la ronda -->
+				<div class="flex flex-col gap-6 flex-1 justify-around">
+					{#each round.matches as match (match.id)}
+						{@const p1 = getParticipant(match.participant1)}
+						{@const p2 = getParticipant(match.participant2)}
+						{@const hasWinner = !!match.winner}
+						{@const isActive = match.isActive}
 
-							<div 
-								class="match-wrapper"
-								style="min-height: {getMatchHeight(round.roundNumber)}"
-							>
-								<div class="match-connector-left"></div>
+						<div class="relative group">
+							<!-- Conector a la derecha (hacia siguiente ronda) -->
+							{#if roundIndex < rounds.length - 1}
+								<div class="absolute left-full top-1/2 w-8 h-0.5 bg-gray-200 hidden xl:block"></div>
+							{/if}
+
+							<!-- Card del match -->
+							<div class="bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 {isActive
+									? 'border-blue-400 shadow-blue-100'
+									: hasWinner
+									? 'border-green-300 shadow-green-50'
+									: 'border-gray-200 hover:border-gray-300'}">
 								
-								<div class="match-box {isActive ? 'match-active' : ''} {hasWinner ? 'match-complete' : ''}">
-									<!-- Número del match -->
-									<div class="match-number">
+								<!-- Header del match -->
+								<div class="px-4 py-3 border-b border-gray-100 bg-gradient-to-r {isActive
+										? 'from-blue-50 to-transparent'
+										: hasWinner
+										? 'from-green-50 to-transparent'
+										: 'from-gray-50 to-transparent'}">
+									<div class="flex items-center justify-between">
+										<span class="text-xs font-bold text-gray-600">
+											Partido {match.matchNumber}
+										</span>
 										{#if isActive}
-											<span class="pulse">⚔️</span>
+											<span class="flex items-center gap-1.5 text-xs font-semibold text-blue-600">
+												<span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+												Activo
+											</span>
+										{:else if hasWinner}
+											<Trophy class="text-green-600" size={14} />
 										{/if}
-										Partido {match.matchNumber}
+									</div>
+								</div>
+
+								<!-- Participantes -->
+								<div class="p-3 space-y-2">{#if p1}
+										<div class="group/p relative flex items-center gap-3 p-3 rounded-xl transition-all duration-200 {match.winner === p1.id
+												? 'bg-gradient-to-r from-amber-50 to-amber-100 border-2 border-amber-300 shadow-md'
+												: 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'}">
+											<img
+												src={p1.avatar}
+												alt={p1.name}
+												class="w-10 h-10 rounded-full object-cover border-2 {match.winner === p1.id ? 'border-amber-400 shadow-lg' : 'border-white'}"
+											/>
+											<span class="flex-1 font-semibold text-sm truncate {match.winner === p1.id ? 'text-amber-900' : 'text-gray-900'}">
+												{p1.name}
+											</span>
+											{#if match.winner === p1.id}
+												<div class="w-7 h-7 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg">
+													<Trophy class="text-white" size={14} />
+												</div>
+											{:else if isActive && isAdmin && tournamentStarted && !hasWinner}
+												<button
+													onclick={() => onMarkWinner?.(match.id, p1.id)}
+													class="opacity-0 group-hover/p:opacity-100 px-3 py-1.5 bg-green-500 text-white text-xs font-semibold rounded-lg hover:bg-green-600 transition-all"
+												>
+													Ganador
+												</button>
+											{/if}
+										</div>
+									{:else}
+										<div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border-2 border-dashed border-gray-300">
+											<div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+												<span class="text-gray-400 text-xs">?</span>
+											</div>
+											<span class="flex-1 text-sm text-gray-400 italic">Por determinar</span>
+										</div>
+									{/if}
+
+									<div class="text-center py-1">
+										<span class="text-xs font-bold text-gray-400">VS</span>
 									</div>
 
-									<!-- Participante 1 -->
-									<div class="participant {match.winner === p1?.id ? 'winner' : ''}">
-										{#if p1}
-											<img src={p1.avatar} alt={p1.name} class="participant-avatar" />
-											<span class="participant-name">{p1.name}</span>
-											{#if match.winner === p1.id}
-												<span class="winner-icon">🏆</span>
+									{#if p2}
+										<div class="group/p relative flex items-center gap-3 p-3 rounded-xl transition-all duration-200 {match.winner === p2.id
+												? 'bg-gradient-to-r from-amber-50 to-amber-100 border-2 border-amber-300 shadow-md'
+												: 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'}">
+											<img
+												src={p2.avatar}
+												alt={p2.name}
+												class="w-10 h-10 rounded-full object-cover border-2 {match.winner === p2.id ? 'border-amber-400 shadow-lg' : 'border-white'}"
+											/>
+											<span class="flex-1 font-semibold text-sm truncate {match.winner === p2.id ? 'text-amber-900' : 'text-gray-900'}">
+												{p2.name}
+											</span>
+											{#if match.winner === p2.id}
+												<div class="w-7 h-7 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg">
+													<Trophy class="text-white" size={14} />
+												</div>
+											{:else if isActive && isAdmin && tournamentStarted && !hasWinner}
+												<button
+													onclick={() => onMarkWinner?.(match.id, p2.id)}
+													class="opacity-0 group-hover/p:opacity-100 px-3 py-1.5 bg-green-500 text-white text-xs font-semibold rounded-lg hover:bg-green-600 transition-all"
+												>
+													Ganador
+												</button>
 											{/if}
-											{#if isActive && isAdmin && !hasWinner}
+										</div>
+									{:else}
+										<div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border-2 border-dashed border-gray-300">
+											<div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+												<span class="text-gray-400 text-xs">?</span>
+											</div>
+											<span class="flex-1 text-sm text-gray-400 italic">
+												{match.participant1 ? 'BYE - Pasa automático' : 'Por determinar'}
+											</span>
+										</div>
+									{/if}
+								</div>
+							</div>
+						</div>
+					{/each}
+				</div>
+			</div>
+		{/each}
+	</div>
+</div>
 												<button
 													onclick={() => onMarkWinner?.(match.id, p1.id)}
 													class="win-btn"
@@ -107,254 +197,26 @@
 													onclick={() => onMarkWinner?.(match.id, p2.id)}
 													class="win-btn"
 												>
-													✓
-												</button>
-											{/if}
-										{:else if !p1}
-											<div class="bye-slot">
-												<span class="bye-text">BYE</span>
-											</div>
-										{:else}
-											<div class="bye-slot">
-												<span class="bye-text">TBD</span>
-											</div>
-										{/if}
-									</div>
-								</div>
-
-								{#if roundIndex < rounds.length - 1}
-									<div class="match-connector-right"></div>
-								{/if}
-							</div>
-						{/each}
-					</div>
-				</div>
-			{/each}
-		</div>
+		{/each}
 	</div>
 </div>
 
 <style>
-	.bracket-container {
-		background: white;
-		border-radius: 1rem;
-		padding: 1.5rem;
-		box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-		overflow: hidden;
+	.custom-scrollbar::-webkit-scrollbar {
+		height: 8px;
 	}
 
-	.bracket-scroll {
-		overflow-x: auto;
-		overflow-y: hidden;
-		max-width: 100%;
+	.custom-scrollbar::-webkit-scrollbar-track {
+		background: #f3f4f6;
+		border-radius: 10px;
 	}
 
-	.bracket-wrapper {
-		display: flex;
-		gap: 3rem;
-		min-width: min-content;
-		padding: 1rem;
-	}
-
-	.bracket-round {
-		display: flex;
-		flex-direction: column;
-		gap: 1.5rem;
-	}
-
-	.round-header {
-		text-align: center;
-		padding-bottom: 1rem;
-		border-bottom: 2px solid #e5e7eb;
-	}
-
-	.round-title {
-		font-size: 1.125rem;
-		font-weight: 700;
-		color: #1f2937;
-		margin-bottom: 0.5rem;
-	}
-
-	.round-badge {
-		display: inline-block;
-		padding: 0.25rem 0.75rem;
-		border-radius: 9999px;
-		font-size: 0.75rem;
-		font-weight: 600;
-	}
-
-	.round-badge.complete {
-		background: #dcfce7;
-		color: #166534;
-	}
-
-	.round-badge.active {
-		background: #fef3c7;
-		color: #92400e;
-		animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-	}
-
-	.matches-container {
-		display: flex;
-		flex-direction: column;
-		justify-content: space-around;
-		flex: 1;
-	}
-
-	.match-wrapper {
-		position: relative;
-		display: flex;
-		align-items: center;
-	}
-
-	.match-box {
-		position: relative;
-		background: white;
-		border: 3px solid #d1d5db;
-		border-radius: 0.75rem;
-		padding: 0.75rem;
-		min-width: 250px;
-		transition: all 0.3s ease;
-		z-index: 10;
-	}
-
-	.match-box.match-active {
-		border-color: #8b5cf6;
-		background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
-		box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
-		transform: scale(1.02);
-	}
-
-	.match-box.match-complete {
-		border-color: #10b981;
-		background: #f0fdf4;
-	}
-
-	.match-number {
-		text-align: center;
-		font-size: 0.75rem;
-		font-weight: 600;
-		color: #6b7280;
-		margin-bottom: 0.5rem;
-		text-transform: uppercase;
-	}
-
-	.pulse {
-		animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-	}
-
-	.participant {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.5rem;
-		border-radius: 0.5rem;
-		background: #f9fafb;
-		transition: all 0.2s;
-		position: relative;
-	}
-
-	.participant.winner {
-		background: linear-gradient(135deg, #fef08a 0%, #fde047 100%);
-		border: 2px solid #eab308;
-		font-weight: 700;
-	}
-
-	.participant-avatar {
-		width: 2.5rem;
-		height: 2.5rem;
-		border-radius: 9999px;
-		object-fit: cover;
-		border: 2px solid white;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-	}
-
-	.participant-name {
-		flex: 1;
-		font-size: 0.875rem;
-		font-weight: 600;
-		color: #1f2937;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	.winner-icon {
-		font-size: 1.5rem;
-		animation: bounce 1s ease-in-out infinite;
-	}
-
-	.win-btn {
-		background: #10b981;
-		color: white;
-		border: none;
-		border-radius: 0.375rem;
-		padding: 0.375rem 0.75rem;
-		font-weight: 600;
-		cursor: pointer;
-		transition: all 0.2s;
-	}
-
-	.win-btn:hover {
-		background: #059669;
-		transform: scale(1.05);
-	}
-
-	.vs-divider {
-		text-align: center;
-		font-size: 0.75rem;
-		font-weight: 700;
-		color: #9ca3af;
-		padding: 0.25rem 0;
-	}
-
-	.bye-slot {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		height: 2.5rem;
-		opacity: 0.5;
-	}
-
-	.bye-text {
-		font-size: 0.75rem;
-		font-weight: 600;
-		color: #9ca3af;
-		font-style: italic;
-	}
-
-	/* Conectores entre matches */
-	.match-connector-left,
-	.match-connector-right {
-		position: absolute;
-		height: 2px;
+	.custom-scrollbar::-webkit-scrollbar-thumb {
 		background: #d1d5db;
-		width: 2rem;
+		border-radius: 10px;
 	}
 
-	.match-connector-left {
-		right: calc(100% + 0.75rem);
-	}
-
-	.match-connector-right {
-		left: calc(100% + 0.75rem);
-	}
-
-	@keyframes pulse {
-		0%, 100% {
-			opacity: 1;
-		}
-		50% {
-			opacity: 0.5;
-		}
-	}
-
-	@keyframes bounce {
-		0%, 100% {
-			transform: translateY(0);
-		}
-		50% {
-			transform: translateY(-10px);
-		}
+	.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+		background: #9ca3af;
 	}
 </style>
