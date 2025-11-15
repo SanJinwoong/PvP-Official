@@ -1,6 +1,7 @@
 import { writable, derived, get } from 'svelte/store';
 import type { Writable } from 'svelte/store';
 import { supabase } from '$lib/supabase';
+import { generateBracket, advanceBracket, isTournamentComplete, getTournamentWinner, type Bracket } from '$lib/bracket-generator';
 
 export interface Participant {
 	id: string;
@@ -24,6 +25,7 @@ export interface RoomState {
 	participants: Participant[];
 	adminId: string;
 	pairs: Pair[];
+	bracket: Bracket | null;
 	tournamentStarted: boolean;
 	tournamentFinished: boolean;
 	currentPairIndex: number;
@@ -146,6 +148,7 @@ function createSupabaseStore() {
 				participants: room.participants,
 				adminId: room.admin_id,
 				pairs: room.pairs,
+				bracket: room.bracket || null,
 				tournamentStarted: room.tournament_started,
 				tournamentFinished: room.tournament_finished,
 				currentPairIndex: room.current_pair_index
@@ -190,23 +193,12 @@ function createSupabaseStore() {
 
 		if (!room) return;
 
-		const participants = [...room.participants];
-		const shuffled = shuffleArray(participants);
-		const pairs = [];
-
-		for (let i = 0; i < shuffled.length; i += 2) {
-			pairs.push({
-				id: crypto.randomUUID(),
-				participant1: shuffled[i].id,
-				participant2: shuffled[i + 1]?.id || null,
-				winner: null,
-				isActive: false
-			});
-		}
+		// Generar bracket profesional
+		const bracket = generateBracket(room.participants);
 
 		await supabase
 			.from('rooms')
-			.update({ pairs })
+			.update({ bracket })
 			.eq('code', roomCode);
 	}
 
@@ -219,23 +211,12 @@ function createSupabaseStore() {
 
 		if (!room || room.tournament_started) return;
 
-		const participants = [...room.participants];
-		const shuffled = shuffleArray(participants);
-		const pairs = [];
-
-		for (let i = 0; i < shuffled.length; i += 2) {
-			pairs.push({
-				id: crypto.randomUUID(),
-				participant1: shuffled[i].id,
-				participant2: shuffled[i + 1]?.id || null,
-				winner: null,
-				isActive: false
-			});
-		}
+		// Regenerar bracket con nuevo orden
+		const bracket = generateBracket(room.participants);
 
 		await supabase
 			.from('rooms')
-			.update({ pairs })
+			.update({ bracket })
 			.eq('code', roomCode);
 	}
 
@@ -272,6 +253,33 @@ function createSupabaseStore() {
 
 		if (!room) return;
 
+		// Si hay bracket, usar el sistema profesional
+		if (room.bracket && room.bracket.rounds) {
+			const newBracket = advanceBracket(room.bracket, pairId, winnerId);
+			const tournamentFinished = isTournamentComplete(newBracket);
+
+			await supabase
+				.from('rooms')
+				.update({ 
+					bracket: newBracket,
+					tournament_finished: tournamentFinished
+				})
+				.eq('code', roomCode);
+
+			// Mostrar animación
+			store.update(s => ({
+				...s,
+				lastWinner: { participantId: winnerId, pairId }
+			}));
+
+			setTimeout(() => {
+				store.update(s => ({ ...s, lastWinner: null }));
+			}, 3000);
+
+			return;
+		}
+
+		// Sistema legacy (pairs)
 		const pairs = room.pairs.map((p: any) => {
 			if (p.id === pairId) {
 				return { ...p, winner: winnerId, isActive: false };

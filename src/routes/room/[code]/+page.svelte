@@ -5,6 +5,7 @@
 	import { wsStore, isAdmin, currentUser, winner } from '$lib/stores/websocket';
 	import ParticipantList from '$lib/components/ParticipantList.svelte';
 	import BracketView from '$lib/components/BracketView.svelte';
+	import ProfessionalBracket from '$lib/components/ProfessionalBracket.svelte';
 	import AdminControls from '$lib/components/AdminControls.svelte';
 	import WinAnimation from '$lib/components/WinAnimation.svelte';
 	import PairWinAnimation from '$lib/components/PairWinAnimation.svelte';
@@ -153,8 +154,19 @@
 				{/if}
 			</div>
 
-			<!-- Columna derecha: Brackets -->
-			<div class="lg:col-span-2">
+		<!-- Columna derecha: Brackets -->
+		<div class="lg:col-span-2">
+			{#if $wsStore.room.bracket && $wsStore.room.bracket.rounds && $wsStore.room.bracket.rounds.length > 0}
+				<!-- Nuevo sistema de brackets profesional -->
+				<ProfessionalBracket
+					rounds={$wsStore.room.bracket.rounds}
+					participants={$wsStore.room.participants}
+					isAdmin={$isAdmin}
+					tournamentStarted={$wsStore.room.tournamentStarted}
+					onMarkWinner={handleMarkWinner}
+				/>
+			{:else}
+				<!-- Sistema antiguo de brackets (fallback) -->
 				<BracketView
 					pairs={$wsStore.room.pairs}
 					participants={$wsStore.room.participants}
@@ -162,8 +174,7 @@
 					tournamentStarted={$wsStore.room.tournamentStarted}
 					onMarkWinner={handleMarkWinner}
 				/>
-
-				{#if !$wsStore.room.tournamentStarted && $wsStore.room.pairs.length === 0 && !$isAdmin}
+			{/if}				{#if !$wsStore.room.tournamentStarted && $wsStore.room.pairs.length === 0 && !$isAdmin}
 					<div class="bg-white rounded-2xl p-8 shadow-lg text-center mt-4">
 						<div class="text-6xl mb-4">⏳</div>
 						<p class="text-xl text-gray-600">

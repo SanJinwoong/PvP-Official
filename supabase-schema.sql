@@ -6,6 +6,8 @@ CREATE TABLE rooms (
   admin_id TEXT NOT NULL,
   participants JSONB DEFAULT '[]'::jsonb,
   pairs JSONB DEFAULT '[]'::jsonb,
+  bracket JSONB DEFAULT '{"rounds": []}'::jsonb,
+  current_round INTEGER DEFAULT 0,
   tournament_started BOOLEAN DEFAULT FALSE,
   tournament_finished BOOLEAN DEFAULT FALSE,
   current_pair_index INTEGER DEFAULT 0,
@@ -54,3 +56,5 @@ COMMENT ON TABLE rooms IS 'Salas de torneos PvP efímeras';
 COMMENT ON COLUMN rooms.code IS 'Código de 6 caracteres para unirse a la sala';
 COMMENT ON COLUMN rooms.participants IS 'Array JSON de participantes con {id, name, avatar, isAdmin, isConnected}';
 COMMENT ON COLUMN rooms.pairs IS 'Array JSON de pares con {id, participant1, participant2, winner, isActive}';
+COMMENT ON COLUMN rooms.bracket IS 'Estructura completa del bracket con múltiples rondas: {rounds: [{roundNumber, roundName, matches: [{id, participant1, participant2, winner, isActive, matchNumber}], isComplete}], totalParticipants, currentRound, currentMatch}';
+COMMENT ON COLUMN rooms.current_round IS 'Ronda actual del torneo (0-indexed)';
