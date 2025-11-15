@@ -1,0 +1,12 @@
+# Dokploy Labels para WebSocket
+# Agregar estas labels en la configuración de Dokploy
+
+traefik.http.routers.pvp.rule=Host(`pvp.jinwoong.me`)
+traefik.http.routers.pvp.entrypoints=websecure
+traefik.http.routers.pvp.tls=true
+traefik.http.routers.pvp.tls.certresolver=letsencrypt
+
+# WebSocket upgrade headers
+traefik.http.middlewares.ws-headers.headers.customrequestheaders.Connection=upgrade
+traefik.http.middlewares.ws-headers.headers.customrequestheaders.Upgrade=websocket
+traefik.http.routers.pvp.middlewares=ws-headers
