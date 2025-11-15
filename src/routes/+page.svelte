@@ -60,7 +60,6 @@
 			alert('Por favor ingresa tu nombre');
 			return;
 		}
-		wsStore.connect();
 		wsStore.createRoom(maxParticipants, name, avatar);
 		showCreateModal = false;
 	}
@@ -70,7 +69,6 @@
 			alert('Por favor completa todos los campos');
 			return;
 		}
-		wsStore.connect();
 		wsStore.joinRoom(roomCode.toUpperCase(), name, avatar);
 		showJoinModal = false;
 	}

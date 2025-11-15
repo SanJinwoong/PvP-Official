@@ -16,18 +16,12 @@
 	let pairWinner = $state<any>(null);
 
 	onMount(() => {
-		// Asegurar que estamos conectados
-		wsStore.connect();
-
 		const unsubscribe = wsStore.subscribe(($ws) => {
-			// Si no hay sala, redirigir al home
-			if (!$ws.connected) return;
-
-			if (!$ws.room && $ws.connected) {
-				// Intentar obtener el estado de la sala
+			// Redirigir si no hay sala después de cargar
+			if ($ws.connected && !$ws.room) {
 				setTimeout(() => {
-					wsStore.getRoomState(roomCode);
-				}, 500);
+					goto('/');
+				}, 2000);
 			}
 
 			// Mostrar ganador final

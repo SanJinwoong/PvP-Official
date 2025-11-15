@@ -1,29 +1,29 @@
-# ⚔️ PvP Arena - Sistema de Torneos Efímeros
+# ⚔️ PvP Arena - Sistema de Torneos en Tiempo Real
 
-Sistema de salas PvP en tiempo real con gestión de torneos, enfrentamientos y animaciones de victoria. Los datos son **volátiles** y se almacenan únicamente en memoria, perdiéndose al reiniciar el servidor.
+Sistema de salas PvP en tiempo real con gestión de torneos, enfrentamientos y animaciones de victoria. Migrado de WebSocket in-memory a **Supabase Realtime** para mayor confiabilidad y persistencia.
 
 ![Status](https://img.shields.io/badge/status-production--ready-green)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
 ## 🎯 Características Principales
 
-- ✨ **Sistema de Salas Efímero**: Creación y unión a salas con códigos únicos (máx. 20 participantes)
+- ✨ **Sistema de Salas**: Creación y unión a salas con códigos únicos (máx. 20 participantes)
 - 👤 **Perfiles Personalizados**: Avatar (upload local → dataURL) + nombre personalizable
 - 🎮 **Gestión de Torneos**: Organización automática de enfrentamientos con algoritmo de emparejamiento
-- ⚡ **Tiempo Real**: Sincronización instantánea vía WebSocket entre todos los clientes
+- ⚡ **Tiempo Real**: Sincronización automática vía **Supabase + Polling** (actualización cada 2 segundos)
 - 👑 **Roles Diferenciados**: Admin (creador) vs Participantes con permisos específicos
 - 🎉 **Animaciones de Premio**: Confetti, efectos visuales y celebraciones al marcar ganadores
 - 🏆 **Podio Final**: Pantalla de celebración con el ganador del torneo
 - 📱 **Diseño Responsive**: Mobile-first, optimizado para móviles y tablets
+- 💾 **Persistencia**: Las salas se guardan en PostgreSQL (Supabase) con limpieza automática después de 24 horas
 
-## ⚠️ IMPORTANTE: Datos Volátiles
+## 🔧 Stack Tecnológico
 
-**Los datos se almacenan ÚNICAMENTE en memoria del servidor.**
-
-- ❌ No hay base de datos
-- ❌ No hay persistencia
-- ❌ Al reiniciar el servidor se pierden TODAS las salas y datos
-- ✅ Ideal para eventos efímeros y sesiones temporales
+- **Frontend**: SvelteKit 2.47.1, Svelte 5 (runes), Tailwind CSS 4.1.14
+- **Backend**: Supabase (PostgreSQL)
+- **Real-time**: Polling cada 2 segundos (compatible con plan gratuito)
+- **Deployment**: Dokploy (Docker) + Traefik
+- **Animaciones**: canvas-confetti
 
 ## 🚀 Instalación y Ejecución
 
@@ -31,14 +31,34 @@ Sistema de salas PvP en tiempo real con gestión de torneos, enfrentamientos y a
 
 - Node.js 18+ 
 - npm o pnpm
+- Cuenta en [Supabase](https://supabase.com) (gratis)
 
-### Paso 1: Instalar Dependencias
+### Paso 1: Configurar Supabase
+
+**🔥 IMPORTANTE**: Sigue la guía completa en [`SUPABASE_SETUP.md`](./SUPABASE_SETUP.md) antes de continuar.
+
+Resumen rápido:
+1. Crea un proyecto en https://supabase.com
+2. Ejecuta el SQL para crear la tabla `rooms` (ver `SUPABASE_SETUP.md`)
+3. Habilita Realtime en la tabla
+4. Copia tu Project URL y anon key
+
+### Paso 2: Variables de Entorno
+
+Crea un archivo `.env` en la raíz:
+
+```env
+VITE_SUPABASE_URL=https://tu-proyecto.supabase.co
+VITE_SUPABASE_ANON_KEY=tu-anon-key-aqui
+```
+
+### Paso 3: Instalar Dependencias
 
 ```powershell
 npm install
 ```
 
-### Paso 2: Ejecutar en Desarrollo
+### Paso 4: Ejecutar en Desarrollo
 
 ```powershell
 npm run dev
@@ -46,7 +66,7 @@ npm run dev
 
 El servidor se iniciará en `http://localhost:5173` (o el puerto asignado por Vite).
 
-### Paso 3: Abrir en el Navegador
+### Paso 5: Abrir en el Navegador
 
 Abre múltiples pestañas/dispositivos en:
 ```
