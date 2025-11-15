@@ -6,10 +6,11 @@
 		rounds: Round[];
 		participants: Participant[];
 		isAdmin: boolean;
+		tournamentStarted?: boolean;
 		onMarkWinner?: (matchId: string, winnerId: string) => void;
 	}
 
-	let { rounds, participants, isAdmin, onMarkWinner }: Props = $props();
+	let { rounds, participants, isAdmin, tournamentStarted = false, onMarkWinner }: Props = $props();
 
 	function getParticipant(id: string | null): Participant | null {
 		if (!id) return null;
