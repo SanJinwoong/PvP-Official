@@ -10,6 +10,7 @@
 	import WinAnimation from '$lib/components/WinAnimation.svelte';
 	import PairWinAnimation from '$lib/components/PairWinAnimation.svelte';
 	import Podium from '$lib/components/Podium.svelte';
+	import LoadingAnimation from '$lib/components/LoadingAnimation.svelte';
 
 	const roomCode = $page.params.code as string;
 
@@ -123,12 +124,8 @@
 
 {#if !$wsStore.room}
 	<div class="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-		<div class="text-center">
-			<div class="w-20 h-20 mx-auto mb-6 rounded-full bg-white shadow-xl flex items-center justify-center">
-				<div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-			</div>
-			<p class="text-xl font-semibold text-gray-900">Conectando a la sala...</p>
-			<p class="text-sm text-gray-500 mt-2">Un momento por favor</p>
+		<div class="bg-white rounded-3xl p-12 shadow-xl border border-gray-100">
+			<LoadingAnimation message="Conectando a la sala" />
 		</div>
 	</div>
 {:else}
@@ -223,15 +220,8 @@
 				/>
 			{/if}				{#if !$wsStore.room.tournamentStarted && $wsStore.room.pairs.length === 0 && !$isAdmin}
 					<div class="bg-white rounded-3xl p-12 shadow-xl text-center border border-gray-100">
-						<div class="w-20 h-20 mx-auto mb-6 rounded-full bg-blue-50 flex items-center justify-center">
-							<svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-							</svg>
-						</div>
-						<p class="text-xl font-bold text-gray-900 mb-2">
-							Esperando al administrador
-						</p>
-						<p class="text-gray-500">
+						<LoadingAnimation message="Esperando al administrador" />
+						<p class="text-gray-500 mt-4">
 							El admin organizará los enfrentamientos pronto
 						</p>
 					</div>
@@ -239,7 +229,7 @@
 
 				{#if !$wsStore.room.tournamentStarted && $wsStore.room.pairs.length > 0 && !$isAdmin}
 					<div class="bg-white rounded-3xl p-12 shadow-xl text-center border border-gray-100">
-						<div class="w-20 h-20 mx-auto mb-6 rounded-full bg-green-50 flex items-center justify-center">
+						<div class="w-20 h-20 mx-auto mb-6 rounded-full bg-green-50 flex items-center justify-center animate-pulse">
 							<svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
