@@ -52,6 +52,10 @@ function createSupabaseStore() {
 
 	const store: Writable<SupabaseState> = writable(initialState);
 	let pollingInterval: ReturnType<typeof setInterval> | null = null;
+	let consecutiveErrors = 0;
+	let lastHeartbeat = Date.now();
+	const MAX_ERRORS = 5;
+	const HEARTBEAT_INTERVAL = 30000; // 30 segundos
 
 	// Guardar clientId
 	if (typeof window !== 'undefined' && !savedClientId && initialState.clientId) {
@@ -59,101 +63,152 @@ function createSupabaseStore() {
 	}
 
 	async function createRoom(maxParticipants: number, name: string, avatar: string) {
-		const clientId = initialState.clientId!;
-		const roomCode = generateRoomCode();
-		
-		const { data, error } = await supabase
-			.from('rooms')
-			.insert({
-				code: roomCode,
-				max_participants: maxParticipants,
-				admin_id: clientId,
-				participants: [{
-					id: clientId,
-					name,
-					avatar,
-					isAdmin: true,
-					isConnected: true
-				}],
-				pairs: [],
-				tournament_started: false,
-				tournament_finished: false,
-				current_pair_index: 0
-			})
-			.select()
-			.single();
+		try {
+			const clientId = initialState.clientId!;
+			const roomCode = generateRoomCode();
+			
+			const { data, error } = await supabase
+				.from('rooms')
+				.insert({
+					code: roomCode,
+					max_participants: maxParticipants,
+					admin_id: clientId,
+					participants: [{
+						id: clientId,
+						name,
+						avatar,
+						isAdmin: true,
+						isConnected: true
+					}],
+					pairs: [],
+					tournament_started: false,
+					tournament_finished: false,
+					current_pair_index: 0
+				})
+				.select()
+				.single();
 
-		if (error) {
-			store.update(s => ({ ...s, error: error.message }));
-			return;
-		}
+			if (error) {
+				console.error('Error creating room:', error);
+				store.update(s => ({ ...s, error: 'No se pudo crear la sala. Intenta de nuevo.' }));
+				return;
+			}
 
-		if (typeof window !== 'undefined') {
-			localStorage.setItem('pvp_room_code', roomCode);
+			if (typeof window !== 'undefined') {
+				localStorage.setItem('pvp_room_code', roomCode);
+			}
+			subscribeToRoom(roomCode);
+		} catch (err) {
+			console.error('Network error creating room:', err);
+			store.update(s => ({ ...s, error: 'Error de conexión. Verifica tu internet.' }));
 		}
-		subscribeToRoom(roomCode);
 	}
 
 	async function joinRoom(code: string, name: string, avatar: string) {
-		const clientId = initialState.clientId!;
-		
-		const { data: room, error } = await supabase
-			.from('rooms')
-			.select('*')
-			.eq('code', code)
-			.single();
+		try {
+			const clientId = initialState.clientId!;
+			
+			const { data: room, error } = await supabase
+				.from('rooms')
+				.select('*')
+				.eq('code', code)
+				.single();
 
-		if (error || !room) {
-			store.update(s => ({ ...s, error: 'Sala no encontrada' }));
-			return;
+			if (error || !room) {
+				store.update(s => ({ ...s, error: 'Sala no encontrada' }));
+				return;
+			}
+
+			// Verificar si ya está llena
+			if (room.participants.length >= room.max_participants) {
+				store.update(s => ({ ...s, error: 'La sala está llena' }));
+				return;
+			}
+
+			// Verificar si el usuario ya está en la sala
+			const alreadyJoined = room.participants.some((p: Participant) => p.id === clientId);
+			if (alreadyJoined) {
+				// Solo reconectar
+				if (typeof window !== 'undefined') {
+					localStorage.setItem('pvp_room_code', code);
+				}
+				subscribeToRoom(code);
+				return;
+			}
+
+			const participants = [...room.participants, {
+				id: clientId,
+				name,
+				avatar,
+				isAdmin: false,
+				isConnected: true
+			}];
+
+			const { error: updateError } = await supabase
+				.from('rooms')
+				.update({ participants })
+				.eq('code', code);
+
+			if (updateError) {
+				console.error('Error joining room:', updateError);
+				store.update(s => ({ ...s, error: 'No se pudo unir a la sala. Intenta de nuevo.' }));
+				return;
+			}
+
+			if (typeof window !== 'undefined') {
+				localStorage.setItem('pvp_room_code', code);
+			}
+			subscribeToRoom(code);
+		} catch (err) {
+			console.error('Network error joining room:', err);
+			store.update(s => ({ ...s, error: 'Error de conexión. Verifica tu internet.' }));
 		}
-
-		const participants = [...room.participants, {
-			id: clientId,
-			name,
-			avatar,
-			isAdmin: false,
-			isConnected: true
-		}];
-
-		await supabase
-			.from('rooms')
-			.update({ participants })
-			.eq('code', code);
-
-		if (typeof window !== 'undefined') {
-			localStorage.setItem('pvp_room_code', code);
-		}
-		subscribeToRoom(code);
 	}
 
 	async function fetchRoomData(roomCode: string) {
-		const { data: room, error } = await supabase
-			.from('rooms')
-			.select('*')
-			.eq('code', roomCode)
-			.single();
+		try {
+			const { data: room, error } = await supabase
+				.from('rooms')
+				.select('*')
+				.eq('code', roomCode)
+				.single();
 
-		if (error || !room) {
-			console.warn('Sala no encontrada:', roomCode);
-			return;
-		}
-
-		store.update(s => ({
-			...s,
-			connected: true,
-			room: {
-				code: room.code,
-				maxParticipants: room.max_participants,
-				participants: room.participants,
-				adminId: room.admin_id,
-				pairs: room.pairs,
-				bracket: room.bracket || null,
-				tournamentStarted: room.tournament_started,
-				tournamentFinished: room.tournament_finished,
-				currentPairIndex: room.current_pair_index
+			if (error || !room) {
+				consecutiveErrors++;
+				if (consecutiveErrors >= MAX_ERRORS) {
+					store.update(s => ({ ...s, error: 'Conexión perdida. Recarga la página.' }));
+					leaveRoom();
+				}
+				return;
 			}
-		}));
+
+			// Reset error counter on success
+			consecutiveErrors = 0;
+
+			store.update(s => ({
+				...s,
+				connected: true,
+				error: null,
+				room: {
+					code: room.code,
+					maxParticipants: room.max_participants,
+					participants: room.participants,
+					adminId: room.admin_id,
+					pairs: room.pairs,
+					bracket: room.bracket || null,
+					tournamentStarted: room.tournament_started,
+					tournamentFinished: room.tournament_finished,
+					currentPairIndex: room.current_pair_index
+				}
+			}));
+		} catch (err) {
+			consecutiveErrors++;
+			console.error('Error fetching room:', err);
+			if (consecutiveErrors >= MAX_ERRORS) {
+				store.update(s => ({ ...s, error: 'Error de conexión. Verifica tu internet.' }));
+				leaveRoom();
+			}
+		}
 	}
 
 	function subscribeToRoom(roomCode: string) {
@@ -162,15 +217,52 @@ function createSupabaseStore() {
 			clearInterval(pollingInterval);
 		}
 
+		// Reset error counter
+		consecutiveErrors = 0;
+		lastHeartbeat = Date.now();
+
 		// Fetch inicial
 		fetchRoomData(roomCode);
 
-		// Polling cada 2 segundos
-		pollingInterval = setInterval(() => {
-			fetchRoomData(roomCode);
-		}, 2000);
+		// Polling cada 3 segundos (reducido para menos carga)
+		pollingInterval = setInterval(async () => {
+			await fetchRoomData(roomCode);
+			
+			// Heartbeat: actualizar isConnected cada 30s
+			if (Date.now() - lastHeartbeat > HEARTBEAT_INTERVAL) {
+				lastHeartbeat = Date.now();
+				await updateHeartbeat(roomCode);
+			}
+		}, 3000);
 
 		store.update(s => ({ ...s, connected: true }));
+	}
+
+	async function updateHeartbeat(roomCode: string) {
+		try {
+			const clientId = initialState.clientId;
+			if (!clientId) return;
+
+			const { data: room } = await supabase
+				.from('rooms')
+				.select('participants')
+				.eq('code', roomCode)
+				.single();
+
+			if (!room) return;
+
+			// Marcar usuario como conectado
+			const participants = room.participants.map((p: Participant) => 
+				p.id === clientId ? { ...p, isConnected: true } : p
+			);
+
+			await supabase
+				.from('rooms')
+				.update({ participants })
+				.eq('code', roomCode);
+		} catch (err) {
+			console.error('Heartbeat error:', err);
+		}
 	}
 
 	async function leaveRoom() {
@@ -381,7 +473,8 @@ function createSupabaseStore() {
 		shufflePairs,
 		startTournament,
 		markWinner,
-		resetTournament
+		resetTournament,
+		clearError: () => store.update(s => ({ ...s, error: null }))
 	};
 }
 
