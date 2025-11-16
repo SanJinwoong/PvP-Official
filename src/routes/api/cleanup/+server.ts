@@ -21,16 +21,16 @@ export const GET: RequestHandler = async () => {
 			return json({ success: true, cleaned: 0, message: 'No hay salas para limpiar' });
 		}
 
-		const now = Date.now();
-		const INACTIVE_THRESHOLD = 10 * 60 * 1000; // 10 minutos de inactividad
-		let cleanedCount = 0;
+	const now = Date.now();
+	const INACTIVE_THRESHOLD = 5 * 60 * 1000; // 5 minutos de inactividad (más agresivo)
+	let cleanedCount = 0;
 
-		for (const room of rooms) {
-			const roomUpdatedAt = new Date(room.updated_at).getTime();
-			const inactiveTime = now - roomUpdatedAt;
+	for (const room of rooms) {
+		const roomUpdatedAt = new Date(room.updated_at).getTime();
+		const inactiveTime = now - roomUpdatedAt;
 
-			// Eliminar salas inactivas por más de 10 minutos
-			if (inactiveTime > INACTIVE_THRESHOLD) {
+		// Eliminar salas inactivas por más de 5 minutos
+		if (inactiveTime > INACTIVE_THRESHOLD) {
 				await supabase
 					.from('rooms')
 					.delete()

@@ -403,6 +403,11 @@
 			<div class="flex-1">
 				<p class="font-bold">Error</p>
 				<p class="text-sm">{$wsStore.error}</p>
+				{#if $wsStore.error.includes('Base de datos llena')}
+					<a href="/db-stats" class="inline-block mt-2 px-4 py-2 bg-white text-red-600 rounded-lg text-xs font-bold hover:bg-red-50 transition-all">
+						🔧 Ir a Diagnóstico
+					</a>
+				{/if}
 			</div>
 			<button 
 				onclick={() => wsStore.clearError()}
@@ -416,3 +421,14 @@
 		</div>
 	</div>
 {/if}
+
+<!-- Botón flotante de diagnóstico (admin tool) -->
+<a 
+	href="/db-stats" 
+	class="fixed bottom-4 left-4 w-14 h-14 bg-purple-600 text-white rounded-full shadow-2xl hover:scale-110 transition-all flex items-center justify-center z-40 hover:bg-purple-700"
+	title="Diagnóstico de Base de Datos"
+>
+	<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+		<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+	</svg>
+</a>

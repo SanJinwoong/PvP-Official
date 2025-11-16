@@ -101,20 +101,28 @@ function createSupabaseStore() {
 					// Si es timeout o network error, reintentar
 					const isRetriable = error.message.includes('TimeoutError') || 
 					                    error.message.includes('NetworkError') || 
+					                    error.message.includes('AbortError') || 
 					                    error.message.includes('fetch') ||
-					                    error.code === '23'; // Código de timeout de Supabase
+					                    error.code === '23' || // Timeout de Supabase
+					                    error.code === '20'; // AbortError
 					
 					if (isRetriable) {
 						retries++;
 						if (retries < MAX_RETRIES) {
+							// Limpiar salas viejas en el primer reintento
+							if (retries === 1) {
+								fetch('/api/cleanup').catch(() => {}); // Silent cleanup
+							}
+							
 							const waitTime = Math.min(2000 * Math.pow(2, retries - 1), 8000); // Max 8s
-							store.update(s => ({ ...s, error: `🔄 Servidor ocupado, reintentando... (${retries}/${MAX_RETRIES})` }));
+							store.update(s => ({ ...s, error: `🔄 Limpiando y reintentando... (${retries}/${MAX_RETRIES})` }));
 							await new Promise(resolve => setTimeout(resolve, waitTime));
 							continue;
 						}
 					}
 					
-					store.update(s => ({ ...s, error: '⏳ Servidor muy ocupado. Espera 30 segundos y vuelve a intentar.' }));
+					// Sugerir limpieza manual si falló todo
+					store.update(s => ({ ...s, error: '⚠️ Base de datos llena. Abre: pvp.jinwoong.me/api/db-stats' }));
 					return;
 				}
 
