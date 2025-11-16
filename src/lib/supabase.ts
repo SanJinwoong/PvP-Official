@@ -12,19 +12,26 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 	},
 	global: {
 		headers: {
-			'x-client-info': 'pvp-arena'
+			'x-client-info': 'pvp-arena',
+			'Prefer': 'return=minimal' // Menos datos en respuesta
 		},
 		fetch: (url, options = {}) => {
+			// Timeout más generoso: 30s para free tier
+			const controller = new AbortController();
+			const timeoutId = setTimeout(() => controller.abort(), 30000);
+			
 			return fetch(url, {
 				...options,
-				signal: AbortSignal.timeout(10000) // 10 segundos timeout
-			});
+				signal: controller.signal
+			}).finally(() => clearTimeout(timeoutId));
 		}
 	},
 	db: {
 		schema: 'public'
 	},
 	auth: {
-		persistSession: false // No guardar sesión, menos overhead
+		persistSession: false,
+		autoRefreshToken: false,
+		detectSessionInUrl: false
 	}
 });

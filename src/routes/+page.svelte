@@ -13,6 +13,8 @@
 	let roomCode = $state('');
 	let isCreating = $state(false);
 	let isJoining = $state(false);
+	let lastActionTime = 0;
+	const DEBOUNCE_TIME = 2000; // 2 segundos entre acciones
 
 	onMount(() => {
 		name = $userProfile.name;
@@ -58,6 +60,13 @@
 	}
 
 	function handleCreateRoom() {
+		// Debouncing: prevenir clicks múltiples
+		const now = Date.now();
+		if (now - lastActionTime < DEBOUNCE_TIME) {
+			return;
+		}
+		lastActionTime = now;
+		
 		if (!name.trim()) {
 			alert('Por favor ingresa tu nombre');
 			return;
@@ -65,28 +74,34 @@
 		isCreating = true;
 		wsStore.createRoom(maxParticipants, name, avatar);
 		
-		// Auto-detener loading después de 15s si falla
+		// Auto-detener loading después de 45s si falla (timeout más generoso)
 		setTimeout(() => {
 			isCreating = false;
-		}, 15000);
+		}, 45000);
 		
 		showCreateModal = false;
 	}
 
-	function handleJoinRoom() {
+	async function handleJoinRoom() {
+		// Debouncing: prevenir clicks múltiples
+		const now = Date.now();
+		if (now - lastActionTime < DEBOUNCE_TIME) {
+			return;
+		}
+		lastActionTime = now;
+		
 		if (!name.trim() || !roomCode.trim()) {
-			alert('Por favor completa todos los campos');
+			alert('✏️ Por favor completa todos los campos');
 			return;
 		}
 		isJoining = true;
-		wsStore.joinRoom(roomCode.toUpperCase(), name, avatar);
-		
-		// Auto-detener loading después de 15s si falla
-		setTimeout(() => {
-			isJoining = false;
-		}, 15000);
-		
 		showJoinModal = false;
+		
+		// Timeout de seguridad más largo
+		setTimeout(() => { isJoining = false; }, 45000); // 45s
+		
+		await wsStore.joinRoom(roomCode.toUpperCase(), name, avatar);
+		isJoining = false;
 	}
 </script>
 

@@ -74,7 +74,8 @@ function createSupabaseStore() {
 				// Mostrar loading
 				store.update(s => ({ ...s, error: null }));
 
-				const { data, error } = await supabase
+				// Insert sin select es más rápido
+				const { error } = await supabase
 					.from('rooms')
 					.insert({
 						code: roomCode,
@@ -92,24 +93,28 @@ function createSupabaseStore() {
 						tournament_started: false,
 						tournament_finished: false,
 						current_pair_index: 0
-					})
-					.select()
-					.single();
+					});
 
 				if (error) {
 					console.error('Error creating room:', error);
 					
-					// Si es timeout, reintentar
-					if (error.message.includes('NetworkError') || error.message.includes('fetch')) {
+					// Si es timeout o network error, reintentar
+					const isRetriable = error.message.includes('TimeoutError') || 
+					                    error.message.includes('NetworkError') || 
+					                    error.message.includes('fetch') ||
+					                    error.code === '23'; // Código de timeout de Supabase
+					
+					if (isRetriable) {
 						retries++;
 						if (retries < MAX_RETRIES) {
-							store.update(s => ({ ...s, error: `Reintentando... (${retries}/${MAX_RETRIES})` }));
-							await new Promise(resolve => setTimeout(resolve, 1000 * retries)); // Exponential backoff
+							const waitTime = Math.min(2000 * Math.pow(2, retries - 1), 8000); // Max 8s
+							store.update(s => ({ ...s, error: `🔄 Servidor ocupado, reintentando... (${retries}/${MAX_RETRIES})` }));
+							await new Promise(resolve => setTimeout(resolve, waitTime));
 							continue;
 						}
 					}
 					
-					store.update(s => ({ ...s, error: 'No se pudo crear la sala. El servidor está lento, intenta de nuevo.' }));
+					store.update(s => ({ ...s, error: '⏳ Servidor muy ocupado. Espera 30 segundos y vuelve a intentar.' }));
 					return;
 				}
 
