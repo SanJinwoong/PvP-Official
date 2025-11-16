@@ -8,13 +8,30 @@
 
 	async function loadStats() {
 		loading = true;
+		message = ''; // Limpiar mensaje anterior
 		try {
+			console.log('🔍 Cargando estadísticas...');
 			const response = await fetch('/api/db-stats');
+			console.log('📡 Response status:', response.status);
+			
+			if (!response.ok) {
+				throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+			}
+			
 			const data = await response.json();
+			console.log('📊 Data recibida:', data);
+			
+			if (!data.success) {
+				throw new Error(data.error || 'Error desconocido');
+			}
+			
 			stats = data.stats;
 			message = data.message;
-		} catch (err) {
-			message = '❌ Error cargando estadísticas';
+			console.log('✅ Estadísticas cargadas:', stats);
+		} catch (err: any) {
+			console.error('❌ Error cargando estadísticas:', err);
+			message = `❌ Error: ${err.message}`;
+			stats = null;
 		}
 		loading = false;
 	}
@@ -73,8 +90,22 @@
 	<div class="max-w-4xl mx-auto">
 		<!-- Header -->
 		<div class="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 mb-6">
-			<h1 class="text-3xl font-black text-gray-900 mb-2">🔍 Diagnóstico de Base de Datos</h1>
-			<p class="text-gray-600">Estado actual de Supabase - PvP Arena</p>
+			<div class="flex items-center justify-between">
+				<div>
+					<h1 class="text-3xl font-black text-gray-900 mb-2">🔍 Diagnóstico de Base de Datos</h1>
+					<p class="text-gray-600">Estado actual de Supabase - PvP Arena</p>
+				</div>
+				<button
+					onclick={loadStats}
+					disabled={loading}
+					class="px-6 py-3 bg-blue-500 text-white font-bold rounded-xl hover:bg-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+				>
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+					</svg>
+					{loading ? 'Cargando...' : 'Recargar'}
+				</button>
+			</div>
 		</div>
 
 		<!-- Stats Card -->
@@ -203,6 +234,30 @@
 					</div>
 				</div>
 			{/if}
+		{:else}
+			<!-- Error state -->
+			<div class="bg-red-50 border-2 border-red-200 rounded-3xl p-12 shadow-xl text-center">
+				<svg class="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+				</svg>
+				<h2 class="text-2xl font-bold text-red-800 mb-2">Error Cargando Datos</h2>
+				<p class="text-red-700 mb-6">{message || 'No se pudieron cargar las estadísticas'}</p>
+				<button
+					onclick={loadStats}
+					class="px-6 py-3 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition-all"
+				>
+					🔄 Reintentar
+				</button>
+				<div class="mt-6 p-4 bg-white rounded-xl text-left">
+					<p class="text-sm text-gray-700 mb-2"><strong>Posibles causas:</strong></p>
+					<ul class="text-sm text-gray-600 space-y-1 list-disc list-inside">
+						<li>Supabase está caído o muy lento</li>
+						<li>Error de conexión a internet</li>
+						<li>El servidor necesita reiniciarse</li>
+					</ul>
+					<p class="text-sm text-gray-700 mt-4"><strong>Abre la consola del navegador (F12) para ver detalles del error.</strong></p>
+				</div>
+			</div>
 		{/if}
 
 		<!-- Back Button -->
