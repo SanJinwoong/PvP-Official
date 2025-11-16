@@ -63,105 +63,159 @@ function createSupabaseStore() {
 	}
 
 	async function createRoom(maxParticipants: number, name: string, avatar: string) {
-		try {
-			const clientId = initialState.clientId!;
-			const roomCode = generateRoomCode();
-			
-			const { data, error } = await supabase
-				.from('rooms')
-				.insert({
-					code: roomCode,
-					max_participants: maxParticipants,
-					admin_id: clientId,
-					participants: [{
-						id: clientId,
-						name,
-						avatar,
-						isAdmin: true,
-						isConnected: true
-					}],
-					pairs: [],
-					tournament_started: false,
-					tournament_finished: false,
-					current_pair_index: 0
-				})
-				.select()
-				.single();
+		const MAX_RETRIES = 3;
+		let retries = 0;
 
-			if (error) {
-				console.error('Error creating room:', error);
-				store.update(s => ({ ...s, error: 'No se pudo crear la sala. Intenta de nuevo.' }));
-				return;
-			}
+		while (retries < MAX_RETRIES) {
+			try {
+				const clientId = initialState.clientId!;
+				const roomCode = generateRoomCode();
+				
+				// Mostrar loading
+				store.update(s => ({ ...s, error: null }));
 
-			if (typeof window !== 'undefined') {
-				localStorage.setItem('pvp_room_code', roomCode);
+				const { data, error } = await supabase
+					.from('rooms')
+					.insert({
+						code: roomCode,
+						max_participants: maxParticipants,
+						admin_id: clientId,
+						participants: [{
+							id: clientId,
+							name,
+							avatar,
+							isAdmin: true,
+							isConnected: true
+						}],
+						pairs: [],
+						bracket: null,
+						tournament_started: false,
+						tournament_finished: false,
+						current_pair_index: 0
+					})
+					.select()
+					.single();
+
+				if (error) {
+					console.error('Error creating room:', error);
+					
+					// Si es timeout, reintentar
+					if (error.message.includes('NetworkError') || error.message.includes('fetch')) {
+						retries++;
+						if (retries < MAX_RETRIES) {
+							store.update(s => ({ ...s, error: `Reintentando... (${retries}/${MAX_RETRIES})` }));
+							await new Promise(resolve => setTimeout(resolve, 1000 * retries)); // Exponential backoff
+							continue;
+						}
+					}
+					
+					store.update(s => ({ ...s, error: 'No se pudo crear la sala. El servidor está lento, intenta de nuevo.' }));
+					return;
+				}
+
+				if (typeof window !== 'undefined') {
+					localStorage.setItem('pvp_room_code', roomCode);
+				}
+				subscribeToRoom(roomCode);
+				return; // Éxito, salir del loop
+			} catch (err) {
+				console.error('Network error creating room:', err);
+				retries++;
+				
+				if (retries < MAX_RETRIES) {
+					store.update(s => ({ ...s, error: `Servidor lento, reintentando... (${retries}/${MAX_RETRIES})` }));
+					await new Promise(resolve => setTimeout(resolve, 1000 * retries));
+				} else {
+					store.update(s => ({ ...s, error: 'Servidor muy lento. Espera 1 minuto y vuelve a intentar.' }));
+				}
 			}
-			subscribeToRoom(roomCode);
-		} catch (err) {
-			console.error('Network error creating room:', err);
-			store.update(s => ({ ...s, error: 'Error de conexión. Verifica tu internet.' }));
 		}
 	}
 
 	async function joinRoom(code: string, name: string, avatar: string) {
-		try {
-			const clientId = initialState.clientId!;
-			
-			const { data: room, error } = await supabase
-				.from('rooms')
-				.select('*')
-				.eq('code', code)
-				.single();
+		const MAX_RETRIES = 3;
+		let retries = 0;
 
-			if (error || !room) {
-				store.update(s => ({ ...s, error: 'Sala no encontrada' }));
-				return;
-			}
+		while (retries < MAX_RETRIES) {
+			try {
+				const clientId = initialState.clientId!;
+				
+				store.update(s => ({ ...s, error: null }));
 
-			// Verificar si ya está llena
-			if (room.participants.length >= room.max_participants) {
-				store.update(s => ({ ...s, error: 'La sala está llena' }));
-				return;
-			}
+				const { data: room, error } = await supabase
+					.from('rooms')
+					.select('*')
+					.eq('code', code)
+					.single();
 
-			// Verificar si el usuario ya está en la sala
-			const alreadyJoined = room.participants.some((p: Participant) => p.id === clientId);
-			if (alreadyJoined) {
-				// Solo reconectar
+				if (error || !room) {
+					store.update(s => ({ ...s, error: 'Sala no encontrada' }));
+					return;
+				}
+
+				// Verificar si ya está llena
+				if (room.participants.length >= room.max_participants) {
+					store.update(s => ({ ...s, error: 'La sala está llena' }));
+					return;
+				}
+
+				// Verificar si el usuario ya está en la sala
+				const alreadyJoined = room.participants.some((p: Participant) => p.id === clientId);
+				if (alreadyJoined) {
+					// Solo reconectar
+					if (typeof window !== 'undefined') {
+						localStorage.setItem('pvp_room_code', code);
+					}
+					subscribeToRoom(code);
+					return;
+				}
+
+				const participants = [...room.participants, {
+					id: clientId,
+					name,
+					avatar,
+					isAdmin: false,
+					isConnected: true
+				}];
+
+				const { error: updateError } = await supabase
+					.from('rooms')
+					.update({ participants })
+					.eq('code', code);
+
+				if (updateError) {
+					console.error('Error joining room:', updateError);
+					
+					// Si es timeout, reintentar
+					if (updateError.message.includes('NetworkError') || updateError.message.includes('fetch')) {
+						retries++;
+						if (retries < MAX_RETRIES) {
+							store.update(s => ({ ...s, error: `Reintentando unirse... (${retries}/${MAX_RETRIES})` }));
+							await new Promise(resolve => setTimeout(resolve, 1000 * retries));
+							continue;
+						}
+					}
+					
+					store.update(s => ({ ...s, error: 'No se pudo unir a la sala. El servidor está lento.' }));
+					return;
+				}
+
 				if (typeof window !== 'undefined') {
 					localStorage.setItem('pvp_room_code', code);
 				}
 				subscribeToRoom(code);
-				return;
+				return; // Éxito
+			} catch (err) {
+				console.error('Network error joining room:', err);
+				retries++;
+				
+				if (retries < MAX_RETRIES) {
+					store.update(s => ({ ...s, error: `Servidor lento, reintentando... (${retries}/${MAX_RETRIES})` }));
+					await new Promise(resolve => setTimeout(resolve, 1000 * retries));
+				} else {
+					store.update(s => ({ ...s, error: 'Servidor muy lento. Espera 1 minuto y vuelve a intentar.' }));
+				}
 			}
-
-			const participants = [...room.participants, {
-				id: clientId,
-				name,
-				avatar,
-				isAdmin: false,
-				isConnected: true
-			}];
-
-			const { error: updateError } = await supabase
-				.from('rooms')
-				.update({ participants })
-				.eq('code', code);
-
-			if (updateError) {
-				console.error('Error joining room:', updateError);
-				store.update(s => ({ ...s, error: 'No se pudo unir a la sala. Intenta de nuevo.' }));
-				return;
-			}
-
-			if (typeof window !== 'undefined') {
-				localStorage.setItem('pvp_room_code', code);
-			}
-			subscribeToRoom(code);
-		} catch (err) {
-			console.error('Network error joining room:', err);
-			store.update(s => ({ ...s, error: 'Error de conexión. Verifica tu internet.' }));
 		}
 	}
 

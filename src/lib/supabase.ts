@@ -9,5 +9,22 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 		params: {
 			eventsPerSecond: 10
 		}
+	},
+	global: {
+		headers: {
+			'x-client-info': 'pvp-arena'
+		},
+		fetch: (url, options = {}) => {
+			return fetch(url, {
+				...options,
+				signal: AbortSignal.timeout(10000) // 10 segundos timeout
+			});
+		}
+	},
+	db: {
+		schema: 'public'
+	},
+	auth: {
+		persistSession: false // No guardar sesión, menos overhead
 	}
 });

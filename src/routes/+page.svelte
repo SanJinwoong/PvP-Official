@@ -11,6 +11,8 @@
 	let showJoinModal = $state(false);
 	let maxParticipants = $state(8);
 	let roomCode = $state('');
+	let isCreating = $state(false);
+	let isJoining = $state(false);
 
 	onMount(() => {
 		name = $userProfile.name;
@@ -60,7 +62,14 @@
 			alert('Por favor ingresa tu nombre');
 			return;
 		}
+		isCreating = true;
 		wsStore.createRoom(maxParticipants, name, avatar);
+		
+		// Auto-detener loading después de 15s si falla
+		setTimeout(() => {
+			isCreating = false;
+		}, 15000);
+		
 		showCreateModal = false;
 	}
 
@@ -69,7 +78,14 @@
 			alert('Por favor completa todos los campos');
 			return;
 		}
+		isJoining = true;
 		wsStore.joinRoom(roomCode.toUpperCase(), name, avatar);
+		
+		// Auto-detener loading después de 15s si falla
+		setTimeout(() => {
+			isJoining = false;
+		}, 15000);
+		
 		showJoinModal = false;
 	}
 </script>
@@ -139,18 +155,36 @@
 				<div class="space-y-2.5 pt-1">
 					<button
 						onclick={openCreateModal}
-						class="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-3.5 px-6 rounded-full shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all duration-200 text-base"
+						disabled={isCreating || isJoining}
+						class="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-3.5 px-6 rounded-full shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all duration-200 text-base disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
 						style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif; letter-spacing: 0.3px;"
 					>
-						CREAR SALA
+						{#if isCreating}
+							<svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+								<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+								<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+							</svg>
+							CREANDO...
+						{:else}
+							CREAR SALA
+						{/if}
 					</button>
 
 					<button
 						onclick={openJoinModal}
-						class="glass-button w-full text-white font-bold py-3.5 px-6 rounded-full border-2 transition-all duration-200 text-base"
+						disabled={isCreating || isJoining}
+						class="glass-button w-full text-white font-bold py-3.5 px-6 rounded-full border-2 transition-all duration-200 text-base disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
 						style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif; letter-spacing: 0.3px;"
 					>
-						UNIRSE A SALA
+						{#if isJoining}
+							<svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+								<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+								<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+							</svg>
+							UNIENDO...
+						{:else}
+							UNIRSE A SALA
+						{/if}
 					</button>
 				</div>
 
